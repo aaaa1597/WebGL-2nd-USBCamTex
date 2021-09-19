@@ -277,21 +277,21 @@ andmat.scaleM = function(retm, mat, x, y, z) {
 		let ly = x;
 		let lz = y;
 
-		retm[     0] *= x;
-		retm[ 4 + 0] *= y;
-		retm[ 8 + 0] *= z;
+		retm[     0] *= lx;
+		retm[ 4 + 0] *= ly;
+		retm[ 8 + 0] *= lz;
 
-		retm[     1] *= x;
-		retm[ 4 + 1] *= y;
-		retm[ 8 + 1] *= z;
+		retm[     1] *= lx;
+		retm[ 4 + 1] *= ly;
+		retm[ 8 + 1] *= lz;
 
-		retm[     2] *= x;
-		retm[ 4 + 2] *= y;
-		retm[ 8 + 2] *= z;
+		retm[     2] *= lx;
+		retm[ 4 + 2] *= ly;
+		retm[ 8 + 2] *= lz;
 
-		retm[     3] *= x;
-		retm[ 4 + 3] *= y;
-		retm[ 8 + 3] *= z;
+		retm[     3] *= lx;
+		retm[ 4 + 3] *= ly;
+		retm[ 8 + 3] *= lz;
 	}
 	else {
 		retm[     0] = mat[     0] * x;
@@ -346,15 +346,15 @@ andmat.rotateM = function(retm, mat, angle, x, y, z) {
 		let ly = x;
 		let lz = y;
 		let sTemp1 = new Float32Array(16);
-		setRotateM(sTemp1, angle, x, y, z);
+		andmat.setRotateM(sTemp1, langle, lx, ly, lz);
 		let sTemp2 = new Float32Array(16);
-		multiplyMM(sTemp2, retm, sTemp1);
+		andmat.multiplyMM(sTemp2, retm, sTemp1);
 		retm = sTemp2;
 	}
 	else {
 		let sTemp = new Float32Array(16);
-		setRotateM(sTemp, angle, x, y, z);
-		multiplyMM(retm, mat, sTemp, 0);
+		andmat.setRotateM(sTemp, angle, x, y, z);
+		andmat.multiplyMM(retm, mat, sTemp);
 	}
 	return;
 }
@@ -394,7 +394,7 @@ andmat.setRotateM = function(retm, angle, x, y, z) {
 		retm[10]= 1;
 	}
 	else {
-		let len = length(x, y, z);
+		let len = andmat.length(x, y, z);
 		if (1.0 != len) {
 			let recipLen = 1.0 / len;
 			x *= recipLen;
@@ -461,7 +461,7 @@ andmat.setLookAtM = function(retm,  eyeX,  eyeY,  eyeZ,  centerX,  centerY,  cen
 	let fy = centerY - eyeY;
 	let fz = centerZ - eyeZ;
 	// Normalize f
-	let rlf = 1.0 / Matrix.length(fx, fy, fz);
+	let rlf = 1.0 / andmat.length(fx, fy, fz);
 	fx *= rlf;
 	fy *= rlf;
 	fz *= rlf;
@@ -470,7 +470,7 @@ andmat.setLookAtM = function(retm,  eyeX,  eyeY,  eyeZ,  centerX,  centerY,  cen
 	let sy = fz * upX - fx * upZ;
 	let sz = fx * upY - fy * upX;
 	// and normalize s
-	let rls = 1.0 / Matrix.length(sx, sy, sz);
+	let rls = 1.0 / andmat.length(sx, sy, sz);
 	sx *= rls;
 	sy *= rls;
 	sz *= rls;
