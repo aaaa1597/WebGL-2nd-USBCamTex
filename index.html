@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>WebGL サンプル</title>
+		<script src="matrix.js" type="text/javascript"></script>
+		<script src="webgl.js" type="text/javascript"></script>
+		<script id="vsh" type="x-shader/x-vertex">
+			/* 頂点シェーダ */
+			attribute vec3 aPosition;
+			attribute vec4 aColor;
+			attribute vec2 aTexCoord;
+			uniform   mat4 uMvpMatrix;
+			varying   vec4 vColor;
+			varying   vec2 vTexCoord;
+			void main(void){
+				vColor = aColor;
+				vTexCoord = aTexCoord;
+				gl_Position  = uMvpMatrix * vec4(aPosition, 1.0);
+			}
+		</script>
+
+		<script id="fsh" type="x-shader/x-fragment">
+			/* フラグメントシェーダ */
+			precision mediump float;
+			uniform sampler2D uTexture;
+			varying vec4      vColor;
+			varying vec2      vTexCoord;
+			void main(void){
+				vec4 smpColor = texture2D(uTexture, vTexCoord);
+				gl_FragColor  = vColor * smpColor;
+			}
+		</script>
+		<script>
+			window.onload = webgl_onload;
+		</script>
+		<style>
+		canvas {
+			background-color: black;
+		}
+		</style>
+	</head>
+
+	<body>
+		<div><canvas id="canvas"></canvas></div>
+		<input type="range" name="speed" min="0" max="100">
+	</body>
+</html>
