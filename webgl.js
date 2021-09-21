@@ -85,12 +85,12 @@ function startWebGL(){
 	let unifHdlMvpMatrix= gl.getUniformLocation(program, 'uMvpMatrix');
 	/* 各行列生成/初期化 */
 	let m = mat.Matrix44;
-	let mMatrix   = m.identity(m.create());
-	let vMatrix   = m.identity(m.create());
-	let pMatrix   = m.identity(m.create());
-	let tmpMatrix = m.identity(m.create());
-	let mvpMatrix = m.identity(m.create());
-	let invMatrix = m.identity(m.create());
+	let mMatrix   = m.loadIdentity(m.create());
+	let vMatrix   = m.loadIdentity(m.create());
+	let pMatrix   = m.loadIdentity(m.create());
+	let tmpMatrix = m.loadIdentity(m.create());
+	let mvpMatrix = m.loadIdentity(m.create());
+	let invMatrix = m.loadIdentity(m.create());
 	
 	// カウンタ初期化
 	let count = 0;
@@ -143,7 +143,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 						[spher.getAttrHdl(eBufType.pos) , spher.getAttrHdl(eBufType.col) , spher.getAttrHdl(eBufType.uv)],
 						[spher.getAttrSize(eBufType.pos), spher.getAttrSize(eBufType.col), spher.getAttrSize(eBufType.uv)]);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, spher.getIboHdl());
-		m.identity(mMatrix);
+		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
@@ -156,7 +156,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 						[cube.getAttrHdl(eBufType.pos) , cube.getAttrHdl(eBufType.col) , cube.getAttrHdl(eBufType.uv)],
 						[cube.getAttrSize(eBufType.pos), cube.getAttrSize(eBufType.col), cube.getAttrSize(eBufType.uv)]);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.getIboHdl());
- 		m.identity(mMatrix);
+ 		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [-1.5, 0.0, 0.0], mMatrix);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
 		m.rotate(mMatrix, Math.PI, [0.0, 0.0, 1.0], mMatrix);
@@ -170,7 +170,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 						[plane.getAttrHdl(eBufType.pos) , plane.getAttrHdl(eBufType.col) , plane.getAttrHdl(eBufType.uv)],
 						[plane.getAttrSize(eBufType.pos), plane.getAttrSize(eBufType.col), plane.getAttrSize(eBufType.uv)]);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.getIboHdl());
-		m.identity(mMatrix);
+		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [2.0, 1.0, 1.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
 		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
