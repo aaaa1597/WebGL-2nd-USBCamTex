@@ -57,6 +57,8 @@ function startWebGL(){
 	/* 深度テスト有効 */
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LEQUAL);
+	/* クリア色設定 */
+	gl.clearColor(0.0, 0.7, 0.7, 1.0);
 	/* カリングを有効 */
 	gl.enable(gl.CULL_FACE);
 	/* 頂点シェーダ生成 */
@@ -64,7 +66,7 @@ function startWebGL(){
 	/* フラグメントシェーダ生成 */
 	let fshader = loadShader(gl.FRAGMENT_SHADER, document.getElementById('fsh').text);
 	/* プログラム生成 */
-	let program = createProgram(vshader, fshader);
+	let program = createProgram(gl, vshader, fshader);
 
 	/*----------- モデル定義 -----------*/
 	/* 平面 */
@@ -88,55 +90,57 @@ function startWebGL(){
 	let mMatrix   = m.createIdentity();
 	let vMatrix   = m.createIdentity();
 	let pMatrix   = m.createIdentity();
-	let tmpMatrix = m.createIdentity();
+	let vpMatrix = m.createIdentity();
 	let mvpMatrix = m.createIdentity();
 	let invMatrix = m.createIdentity();
 	
-	// カウンタ初期化
+	/*----------- テクスチャ定義 -----------*/
+	enableTexture(gl, video);
+	function enableTexture(gl, video) {
+		let videoTexture = gl.createTexture(gl.TEXTURE_2D);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, videoTexture);
+//		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, video);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	};
+	
+	/* 定期カウンタ初期化 */
 	let count = 0;
-	
-	// テクスチャ関連
-	let videoTexture = gl.createTexture(gl.TEXTURE_2D);
-	
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, videoTexture);
-//	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, video);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-let q = mat.Vector4;
-let qt = q.LoadIdentity(q.create());
+	/*----------- ジェスチャ操作保持 -----------*/
+	let v = mat.Vector4;
+	let vecMouseAngle = v.LoadIdentity(v.create());
 
 /* マウスイベント設定 */
 canvas.addEventListener('mousemove', mouseMove, true);
 
 	// 恒常ループ
 	(function(){
-		// カウンタをインクリメントする
+		/* 定期カウンタインクリメント */
 		count++;
 
-		// カウンタを元にラジアンを算出
+		/* 角度算出(カウンタを元にラジアン[rad]を求める) */
 		let rad  = (count % 360) * Math.PI / 180;
 
-		// canvasを初期化
-		gl.clearColor(0.0, 0.7, 0.7, 1.0);
+		/* canvas初期化 */
 		gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		// テクスチャを更新する
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, video);
+		/* テクスチャ更新 */
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
 
-		// ビュー×プロジェクション座標変換行列
-		let eyePosition = new Array();
-		let camUpDirection = new Array();
-		q.toVec3([0.0, 0.0, 7.0], qt, eyePosition);
-		q.toVec3([0.0, 1.0, 0.0], qt, camUpDirection);
+		/* ビュー×プロジェクション座標変換行列 */
+		let eyePosition   = [];
+		let camUpDirection= [];
+		v.toVec3([0.0, 0.0, 7.0], vecMouseAngle, eyePosition);
+		v.toVec3([0.0, 1.0, 0.0], vecMouseAngle, camUpDirection);
 		m.lookAt(eyePosition, [0.0, 0.0, 0.0], camUpDirection, vMatrix);
 		m.perspective(45, canvas.width / canvas.height, 0.1, 10.0, pMatrix);
-		m.multiply(pMatrix, vMatrix, tmpMatrix);
+		m.multiply(pMatrix, vMatrix, vpMatrix);
 
 		/* 球体レンダリング */
 		set_attribute(  [spher.getVboHdl(eBufType.pos)  , spher.getVboHdl(eBufType.col)  , spher.getVboHdl(eBufType.uv)], 
@@ -146,7 +150,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
-		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+		m.multiply(vpMatrix, mMatrix, mvpMatrix);
 		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
 		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, spher.getIboLen(), gl.UNSIGNED_SHORT, 0);
@@ -160,7 +164,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.translate(mMatrix, [-1.5, 0.0, 0.0], mMatrix);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
 		m.rotate(mMatrix, Math.PI, [0.0, 0.0, 1.0], mMatrix);
-		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+		m.multiply(vpMatrix, mMatrix, mvpMatrix);
 		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
 		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, cube.getIboLen(), gl.UNSIGNED_SHORT, 0);
@@ -172,15 +176,15 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.getIboHdl());
 		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [2.0, 1.0, 1.0], mMatrix);
-		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+		m.multiply(vpMatrix, mMatrix, mvpMatrix);
 		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
 		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, plane.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
-		// コンテキストの再描画
+		/* コンテキストの再描画 */
 		gl.flush();
 
-		// ループのために再帰呼び出し
+		/* ループのために再帰呼び出し */
 		requestAnimationFrame(arguments.callee);
 	})();
 
@@ -199,23 +203,6 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		}
 
 		return shdr;
-	}
-
-	/* プログラム生成(とシェーダリンク) */
-	function createProgram(vsh, fsh) {
-		let program = gl.createProgram();
-		gl.attachShader(program, vsh);
-		gl.attachShader(program, fsh);
-		gl.linkProgram(program);
-
-		/* リンク結果判定 */
-		if( !gl.getProgramParameter(program, gl.LINK_STATUS) ) {
-			let str = gl.getShaderInfoLog( program );
-			throw new Error("failed to link program: " + str);
-		}
-
-		gl.useProgram(program);
-		return program;
 	}
 
 	// VBOをバインドし登録する関数
@@ -247,9 +234,26 @@ canvas.addEventListener('mousemove', mouseMove, true);
 			x *= sq;
 			y *= sq;
 		}
-		mat.Vector4.rotate(r, [y, x, 0.0], qt);
+		mat.Vector4.rotate(r, [y, x, 0.0], vecMouseAngle);
 	}
 }
+}
+
+/* プログラム生成(とシェーダリンク) */
+function createProgram(gl, vsh, fsh) {
+	let program = gl.createProgram();
+	gl.attachShader(program, vsh);
+	gl.attachShader(program, fsh);
+	gl.linkProgram(program);
+
+	/* リンク結果判定 */
+	if( !gl.getProgramParameter(program, gl.LINK_STATUS) ) {
+		let str = gl.getShaderInfoLog( program );
+		throw new Error("failed to link program: " + str);
+	}
+
+	gl.useProgram(program);
+	return program;
 }
 
 /* IBO生成 */
