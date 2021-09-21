@@ -62,9 +62,9 @@ function startWebGL(){
 	/* カリングを有効 */
 	gl.enable(gl.CULL_FACE);
 	/* 頂点シェーダ生成 */
-	let vshader = loadShader(gl.VERTEX_SHADER  , document.getElementById('vsh').text);
+	let vshader = loadShader(gl, gl.VERTEX_SHADER  , document.getElementById('vsh').text);
 	/* フラグメントシェーダ生成 */
-	let fshader = loadShader(gl.FRAGMENT_SHADER, document.getElementById('fsh').text);
+	let fshader = loadShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fsh').text);
 	/* プログラム生成 */
 	let program = createProgram(gl, vshader, fshader);
 
@@ -188,23 +188,6 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		requestAnimationFrame(arguments.callee);
 	})();
 
-	/* シェーダ生成 */
-	function loadShader(shadertype, srcstr) {
-		/* シェーダ生成 */
-		let shdr = gl.createShader(shadertype);
-		/* シェーダソースを送る */
-		gl.shaderSource( shdr, srcstr );
-		/* コンパイル */
-		gl.compileShader(shdr);
-		/* コンパイル結果判定 */
-		if( !gl.getShaderParameter( shdr, gl.COMPILE_STATUS) ) {
-			let str = gl.getShaderInfoLog( shdr );
-			throw new Error("unable to create shader shader type = " + shadertype + " : " + str);
-		}
-
-		return shdr;
-	}
-
 	// VBOをバインドし登録する関数
 	function set_attribute(vbo, attL, attS){
 		// 引数として受け取った配列を処理する
@@ -254,6 +237,23 @@ function createProgram(gl, vsh, fsh) {
 
 	gl.useProgram(program);
 	return program;
+}
+
+/* シェーダ生成 */
+function loadShader(gl, shadertype, srcstr) {
+	/* シェーダ生成 */
+	let shdr = gl.createShader(shadertype);
+	/* シェーダソースを送る */
+	gl.shaderSource( shdr, srcstr );
+	/* コンパイル */
+	gl.compileShader(shdr);
+	/* コンパイル結果判定 */
+	if( !gl.getShaderParameter( shdr, gl.COMPILE_STATUS) ) {
+		let str = gl.getShaderInfoLog( shdr );
+		throw new Error("unable to create shader shader type = " + shadertype + " : " + str);
+	}
+
+	return shdr;
 }
 
 /* IBO生成 */
