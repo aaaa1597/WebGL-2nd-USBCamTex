@@ -490,7 +490,7 @@ function cube(side, color){
 	return {p : pos, n : nor, c : col, t : st, i : idx};
 }
 
-function hsva2rgba(h, s, v, a){
+function createRgbaformhsva(h, s, v, a){
 	if(s > 1 || v > 1 || a > 1){return;}
 	let th = h % 360;
 	let i = Math.floor(th / 60);

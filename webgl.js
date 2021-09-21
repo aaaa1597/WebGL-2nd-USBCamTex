@@ -74,15 +74,10 @@ function startWebGL(){
 	/* 平面 */
 	let plane = new GLPlaneMolde(gl, program);
 
-	// キューブモデル
-	let cubeData  = cube(2.0, [1.0, 1.0, 1.0, 1.0]);
-	let cPosition = createVbo(gl, cubeData.p);
-	let cColor    = createVbo(gl, cubeData.c);
-	let cTexCoord = createVbo(gl, cubeData.t);
-	let cVBOList  = [cPosition, cColor, cTexCoord];
-	let cIndex    = createIbo(gl, cubeData.i);
+	/* cubeモデル */
+	let cube = new GLCubeMolde(gl, program);
 	
-	// 球体モデル
+	/* 球体モデル */
 	let sphereData = sphere(64, 64, 1.0, [1.0, 1.0, 1.0, 1.0]);
 	let sPosition  = createVbo(gl, sphereData.p);
 	let sColor     = createVbo(gl, sphereData.c);
@@ -163,18 +158,19 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		gl.uniform1i(uniLocation[1], 0);
 		gl.drawElements(gl.TRIANGLES, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
 		
-		// キューブをレンダリング
-		set_attribute(cVBOList, [attPos3Col3Tex2[0].hVal, attPos3Col3Tex2[1].hVal, attPos3Col3Tex2[2].hVal,],
-								[attPos3Col3Tex2[0].size, attPos3Col3Tex2[1].size, attPos3Col3Tex2[2].size,]);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cIndex);
-		m.identity(mMatrix);
+		/* cubeレンダリング */
+		set_attribute(	[cube.getVboHdl(eBufType.pos)  , cube.getVboHdl(eBufType.col)  , cube.getVboHdl(eBufType.uv)], 
+						[cube.getAttrHdl(eBufType.pos) , cube.getAttrHdl(eBufType.col) , cube.getAttrHdl(eBufType.uv)],
+						[cube.getAttrSize(eBufType.pos), cube.getAttrSize(eBufType.col), cube.getAttrSize(eBufType.uv)]);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.getIboHdl());
+ 		m.identity(mMatrix);
 		m.translate(mMatrix, [-1.5, 0.0, 0.0], mMatrix);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
 		m.rotate(mMatrix, Math.PI, [0.0, 0.0, 1.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
 		gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
 		gl.uniform1i(uniLocation[1], 0);
-		gl.drawElements(gl.TRIANGLES, cubeData.i.length, gl.UNSIGNED_SHORT, 0);
+		gl.drawElements(gl.TRIANGLES, cube.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
 		/* 平面描画 */
 		set_attribute(	[plane.getVboHdl(eBufType.pos)  , plane.getVboHdl(eBufType.col)  , plane.getVboHdl(eBufType.uv)], 
