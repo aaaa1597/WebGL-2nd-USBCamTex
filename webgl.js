@@ -224,7 +224,7 @@ function createProgram(gl, vsh, fsh) {
 	return program;
 }
 
-/* VBOをシェーダのattribute変数にバインドする */
+/* VBOをシェーダのattribute変数にバインド */
 function bindVbo2Att(gl, vbohdl, atthdl, attdim){
 	gl.bindBuffer(gl.ARRAY_BUFFER, vbohdl);							/* VBOバインド */
 	gl.enableVertexAttribArray(atthdl);								/* attribute変数を有効化 */
