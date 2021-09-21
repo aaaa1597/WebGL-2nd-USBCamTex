@@ -2,6 +2,12 @@
 navigator.getUserMedia = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
                          navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
+/* シェーダ変数定義 */
+const aPosition	= 'aPosition';
+const aColor	= 'aColor';
+const aTexCoord = 'aTexCoord';
+
+/* エントリポイント */
 function webgl_onload() {
 	/* canvasエレメント初期化 */
 	let canvas = document.getElementById('canvas');
@@ -60,58 +66,29 @@ function startWebGL(){
 	/* プログラム生成 */
 	let program = createProgram(vshader, fshader);
 	/* attribute変数(s)を定義 */
-	let attPos3Col3Tex2 = [ {'size': 3, 'hVal' : gl.getAttribLocation(program, 'aPosition'),},
-							{'size': 3, 'hVal' : gl.getAttribLocation(program, 'aColor'),   },
-							{'size': 2, 'hVal' : gl.getAttribLocation(program, 'aTexCoord'),},];
+	let attPos3Col3Tex2 = [ {'size': 3, 'hVal' : gl.getAttribLocation(program, aPosition),},
+							{'size': 3, 'hVal' : gl.getAttribLocation(program, aColor),   },
+							{'size': 2, 'hVal' : gl.getAttribLocation(program, aTexCoord),},];
 
 	/*----------- モデル定義 -----------*/
 	/* 平面 */
-	let planeModel_glInfo =
-		function() {
-			let ModelData = createPlane(3);
-			function createPlane(size){
-				let vertex = [
-					-size, -size, 0,   size, -size, 0,   size, size, 0,  -size,  size, 0,
-				];
-				let nor = [
-					1.0, 1.0,  1.0,  1.0, 1.0,  1.0,  1.0,  1.0,  1.0, 1.0,  1.0,  1.0,
-				];
-				let col = new Array();
-				col.push(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, );
-
-				let uv = [
-					0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
-				];
-				let idx = [
-					 0,  1,  2,  0,  2,  3,
-				];
-				return {p : vertex, n : nor, c : col, t : uv, i : idx};
-			}
-			let hPosition  = create_vbo(ModelData.p);
-			let hColor     = create_vbo(ModelData.c);
-			let hTexCoord  = create_vbo(ModelData.t);
-			let hIndex     = create_ibo(ModelData.i);
-			return	{'vbos':{'pos': {'vbo_hdl' : hPosition, 'size': attPos3Col3Tex2[0].size, 'atr_hdl': attPos3Col3Tex2[0].hVal},
-							 'col': {'vbo_hdl' : hColor   , 'size': attPos3Col3Tex2[1].size, 'atr_hdl': attPos3Col3Tex2[1].hVal},
-							 'uv' : {'vbo_hdl' : hTexCoord, 'size': attPos3Col3Tex2[2].size, 'atr_hdl': attPos3Col3Tex2[2].hVal},},
-					'ibo' : {'ibo_hdl': hIndex, 'idxlen': ModelData.i.length,},};
-		}();
+	let plane = new GLPlaneMolde(gl, program);
 
 	// キューブモデル
 	let cubeData  = cube(2.0, [1.0, 1.0, 1.0, 1.0]);
-	let cPosition = create_vbo(cubeData.p);
-	let cColor    = create_vbo(cubeData.c);
-	let cTexCoord = create_vbo(cubeData.t);
+	let cPosition = createVbo(gl, cubeData.p);
+	let cColor    = createVbo(gl, cubeData.c);
+	let cTexCoord = createVbo(gl, cubeData.t);
 	let cVBOList  = [cPosition, cColor, cTexCoord];
-	let cIndex    = create_ibo(cubeData.i);
+	let cIndex    = createIbo(gl, cubeData.i);
 	
 	// 球体モデル
 	let sphereData = sphere(64, 64, 1.0, [1.0, 1.0, 1.0, 1.0]);
-	let sPosition  = create_vbo(sphereData.p);
-	let sColor     = create_vbo(sphereData.c);
-	let sTexCoord  = create_vbo(sphereData.t);
+	let sPosition  = createVbo(gl, sphereData.p);
+	let sColor     = createVbo(gl, sphereData.c);
+	let sTexCoord  = createVbo(gl, sphereData.t);
 	let sVBOList   = [sPosition, sColor, sTexCoord];
-	let sIndex     = create_ibo(sphereData.i);
+	let sIndex     = createIbo(gl, sphereData.i);
 	
 	/*----------- 空間定義 -----------*/
 	// uniformLocationを配列に取得
@@ -142,8 +119,6 @@ function startWebGL(){
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	
-
 
 let q = mat.Vector4;
 let qt = q.identity(q.create());
@@ -202,16 +177,16 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		gl.drawElements(gl.TRIANGLES, cubeData.i.length, gl.UNSIGNED_SHORT, 0);
 
 		/* 平面描画 */
-		set_attribute(	[planeModel_glInfo.vbos.pos.vbo_hdl, planeModel_glInfo.vbos.col.vbo_hdl, planeModel_glInfo.vbos.uv.vbo_hdl], 
-						[planeModel_glInfo.vbos.pos.atr_hdl, planeModel_glInfo.vbos.col.atr_hdl, planeModel_glInfo.vbos.uv.atr_hdl],
-						[planeModel_glInfo.vbos.pos.size   , planeModel_glInfo.vbos.col.size   , planeModel_glInfo.vbos.uv.size   ]);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, planeModel_glInfo.ibo.ibo_hdl);
+		set_attribute(	[plane.getVboHdl(eBufType.pos)  , plane.getVboHdl(eBufType.col)  , plane.getVboHdl(eBufType.uv)], 
+						[plane.getAttrHdl(eBufType.pos) , plane.getAttrHdl(eBufType.col) , plane.getAttrHdl(eBufType.uv)],
+						[plane.getAttrSize(eBufType.pos), plane.getAttrSize(eBufType.col), plane.getAttrSize(eBufType.uv)]);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.getIboHdl());
 		m.identity(mMatrix);
 		m.translate(mMatrix, [2.0, 1.0, 1.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
 		gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
 		gl.uniform1i(uniLocation[1], 0);
-		gl.drawElements(gl.TRIANGLES, planeModel_glInfo.ibo.idxlen, gl.UNSIGNED_SHORT, 0);
+		gl.drawElements(gl.TRIANGLES, plane.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
 		// コンテキストの再描画
 		gl.flush();
@@ -254,24 +229,6 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		return program;
 	}
 
-	// VBOを生成する関数
-	function create_vbo(data){
-		// バッファオブジェクトの生成
-		let vbo = gl.createBuffer();
-		
-		// バッファをバインドする
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		
-		// バッファにデータをセット
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-		
-		// バッファのバインドを無効化
-		gl.bindBuffer(gl.ARRAY_BUFFER, null);
-		
-		// 生成した VBO を返して終了
-		return vbo;
-	}
-
 	// VBOをバインドし登録する関数
 	function set_attribute(vbo, attL, attS){
 		// 引数として受け取った配列を処理する
@@ -287,24 +244,6 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		}
 	}
 
-	// IBOを生成する関数
-	function create_ibo(data){
-		// バッファオブジェクトの生成
-		let ibo = gl.createBuffer();
-		
-		// バッファをバインドする
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-		
-		// バッファにデータをセット
-		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(data), gl.STATIC_DRAW);
-		
-		// バッファのバインドを無効化
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-		
-		// 生成したIBOを返して終了
-		return ibo;
-	}
-	
 	// マウスムーブイベントに登録する処理
 	function mouseMove(e){
 		let cw = canvas.width;
@@ -322,4 +261,22 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		mat.Vector4.rotate(r, [y, x, 0.0], qt);
 	}
 }
+}
+
+/* IBO生成 */
+function createIbo(gl, data){
+	let ibo = gl.createBuffer();													/* BO生成 */
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);									/* IBOとしてバインド */
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(data), gl.STATIC_DRAW);	/* データをセット */
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);									/* バインド解除 */
+	return ibo;
+}
+	
+/* VBO生成 */
+function createVbo(gl, data){
+	let vbo = gl.createBuffer();											/* BO生成 */
+	gl.bindBuffer(gl.ARRAY_BUFFER, vbo);									/* VBOとしてバインド */
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);	/* データをセット */
+	gl.bindBuffer(gl.ARRAY_BUFFER, null);									/* バインド解除 */
+	return vbo;
 }
