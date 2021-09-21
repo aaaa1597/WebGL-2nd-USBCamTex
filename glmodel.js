@@ -3,25 +3,8 @@ function mixin(base = null) {
 	class Mixin extends base { }
 	return Mixin;
 }
-  
-class Base {
-	method() { }
-	method2() {
-		console.log("Mixin method2222");
-	}
-}
 
-class Derived extends mixin(Base) {
-	method() {
-		console.log("子 Mixin method");
-	}
-}
-
-const derived = new Derived();
-derived.method();
-derived.method2();
-
-/* pos:頂点 nor:法線 col:色 uv:テクスチャ座標 idx:頂点index  */
+/* Enum pos:頂点 nor:法線 col:色 uv:テクスチャ座標 idx:頂点index  */
 const eBufType = { pos: 0, nor: 1, col: 2, uv: 3, idx:4};
 
 class GlModelBase {

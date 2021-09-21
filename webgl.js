@@ -7,6 +7,9 @@ const aPosition	= 'aPosition';
 const aColor	= 'aColor';
 const aTexCoord = 'aTexCoord';
 
+/* 相対位置座標 */
+const relPos = {tlansx:0,tlansy:0,tlansz:0,rotz:0,roty:0,rotz:0,scalex:0,scaley:0,scalez:0,isDgagging:false,}
+
 /* エントリポイント */
 function webgl_onload() {
 	/* canvasエレメント初期化 */
@@ -117,6 +120,8 @@ function startWebGL(){
 
 	/* マウスイベント設定 */
 	canvas.addEventListener('mousemove', mouseMove, true);
+	canvas.addEventListener('mousedown' , function(e) { relPos.isDgagging=true; });
+	canvas.addEventListener('mouseup'   , function(e) { relPos.isDgagging=false;});
 
 	// 恒常ループ
 	(function(){
@@ -190,6 +195,8 @@ function startWebGL(){
 
 	/* マウス移動イベント */
 	function mouseMove(e){
+		if(relPos.isDgagging==false) return;
+
 		let cw = canvas.width;
 		let ch = canvas.height;
 		let wh = 1 / Math.sqrt(cw * cw + ch * ch);
