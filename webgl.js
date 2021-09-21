@@ -65,10 +65,6 @@ function startWebGL(){
 	let fshader = loadShader(gl.FRAGMENT_SHADER, document.getElementById('fsh').text);
 	/* プログラム生成 */
 	let program = createProgram(vshader, fshader);
-	/* attribute変数(s)を定義 */
-	let attPos3Col3Tex2 = [ {'size': 3, 'hVal' : gl.getAttribLocation(program, aPosition),},
-							{'size': 3, 'hVal' : gl.getAttribLocation(program, aColor),   },
-							{'size': 2, 'hVal' : gl.getAttribLocation(program, aTexCoord),},];
 
 	/*----------- モデル定義 -----------*/
 	/* 平面 */
@@ -80,13 +76,14 @@ function startWebGL(){
 	/* 球体モデル */
 	let spher = new GLSphereMolde(gl, program);
 	
+	/*----------- テクスチャ定義 -----------*/
+	/* シェーダのTextureハンドラを取得 */
+	let unifHdlTexture  = gl.getUniformLocation(program, 'uTexture');
+
 	/*----------- 空間定義 -----------*/
-	// uniformLocationを配列に取得
-	let uniLocation = new Array();
-	uniLocation[0] = gl.getUniformLocation(program, 'uMvpMatrix');
-	uniLocation[1] = gl.getUniformLocation(program, 'uTexture');
-	
-	// 各種行列の生成と初期化
+	/* シェーダのMvp行列ハンドラを取得 */
+	let unifHdlMvpMatrix= gl.getUniformLocation(program, 'uMvpMatrix');
+	/* 各行列生成/初期化 */
 	let m = mat.Matrix44;
 	let mMatrix   = m.identity(m.create());
 	let vMatrix   = m.identity(m.create());
@@ -150,8 +147,8 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
-		gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
-		gl.uniform1i(uniLocation[1], 0);
+		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
+		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, spher.getIboLen(), gl.UNSIGNED_SHORT, 0);
 		
 		/* cubeレンダリング */
@@ -164,8 +161,8 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
 		m.rotate(mMatrix, Math.PI, [0.0, 0.0, 1.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
-		gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
-		gl.uniform1i(uniLocation[1], 0);
+		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
+		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, cube.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
 		/* 平面描画 */
@@ -176,8 +173,8 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.identity(mMatrix);
 		m.translate(mMatrix, [2.0, 1.0, 1.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
-		gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
-		gl.uniform1i(uniLocation[1], 0);
+		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
+		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, plane.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
 		// コンテキストの再描画
