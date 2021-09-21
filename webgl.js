@@ -143,9 +143,9 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.multiply(pMatrix, vMatrix, vpMatrix);
 
 		/* 球体レンダリング */
-		set_attribute(  [spher.getVboHdl(eBufType.pos)  , spher.getVboHdl(eBufType.col)  , spher.getVboHdl(eBufType.uv)], 
-						[spher.getAttrHdl(eBufType.pos) , spher.getAttrHdl(eBufType.col) , spher.getAttrHdl(eBufType.uv)],
-						[spher.getAttrSize(eBufType.pos), spher.getAttrSize(eBufType.col), spher.getAttrSize(eBufType.uv)]);
+		/* 頂点 */bindVbo2Att(gl, spher.getVboHdl(eBufType.pos), spher.getAttrHdl(eBufType.pos), spher.getAttrSize(eBufType.pos));
+		/* 色   */bindVbo2Att(gl, spher.getVboHdl(eBufType.col), spher.getAttrHdl(eBufType.col), spher.getAttrSize(eBufType.col));
+		/* Tex  */bindVbo2Att(gl, spher.getVboHdl(eBufType.uv) , spher.getAttrHdl(eBufType.uv) , spher.getAttrSize(eBufType.uv));
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, spher.getIboHdl());
 		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
@@ -156,9 +156,9 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		gl.drawElements(gl.TRIANGLES, spher.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
 		/* cubeレンダリング */
-		set_attribute(	[cube.getVboHdl(eBufType.pos)  , cube.getVboHdl(eBufType.col)  , cube.getVboHdl(eBufType.uv)], 
-						[cube.getAttrHdl(eBufType.pos) , cube.getAttrHdl(eBufType.col) , cube.getAttrHdl(eBufType.uv)],
-						[cube.getAttrSize(eBufType.pos), cube.getAttrSize(eBufType.col), cube.getAttrSize(eBufType.uv)]);
+		/* 頂点 */bindVbo2Att(gl, cube.getVboHdl(eBufType.pos), cube.getAttrHdl(eBufType.pos), cube.getAttrSize(eBufType.pos));
+		/* 色   */bindVbo2Att(gl, cube.getVboHdl(eBufType.col), cube.getAttrHdl(eBufType.col), cube.getAttrSize(eBufType.col));
+		/* Tex  */bindVbo2Att(gl, cube.getVboHdl(eBufType.uv) , cube.getAttrHdl(eBufType.uv) , cube.getAttrSize(eBufType.uv));
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.getIboHdl());
  		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [-1.5, 0.0, 0.0], mMatrix);
@@ -170,9 +170,9 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		gl.drawElements(gl.TRIANGLES, cube.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
 		/* 平面描画 */
-		set_attribute(	[plane.getVboHdl(eBufType.pos)  , plane.getVboHdl(eBufType.col)  , plane.getVboHdl(eBufType.uv)], 
-						[plane.getAttrHdl(eBufType.pos) , plane.getAttrHdl(eBufType.col) , plane.getAttrHdl(eBufType.uv)],
-						[plane.getAttrSize(eBufType.pos), plane.getAttrSize(eBufType.col), plane.getAttrSize(eBufType.uv)]);
+		/* 頂点 */bindVbo2Att(gl, plane.getVboHdl(eBufType.pos), plane.getAttrHdl(eBufType.pos), plane.getAttrSize(eBufType.pos));
+		/* 色   */bindVbo2Att(gl, plane.getVboHdl(eBufType.col), plane.getAttrHdl(eBufType.col), plane.getAttrSize(eBufType.col));
+		/* Tex  */bindVbo2Att(gl, plane.getVboHdl(eBufType.uv) , plane.getAttrHdl(eBufType.uv) , plane.getAttrSize(eBufType.uv));
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.getIboHdl());
 		m.loadIdentity(mMatrix);
 		m.translate(mMatrix, [2.0, 1.0, 1.0], mMatrix);
@@ -187,21 +187,6 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		/* ループのために再帰呼び出し */
 		requestAnimationFrame(arguments.callee);
 	})();
-
-	// VBOをバインドし登録する関数
-	function set_attribute(vbo, attL, attS){
-		// 引数として受け取った配列を処理する
-		for(let i in vbo){
-			// バッファをバインドする
-			gl.bindBuffer(gl.ARRAY_BUFFER, vbo[i]);
-			
-			// attributeLocationを有効にする
-			gl.enableVertexAttribArray(attL[i]);
-			
-			// attributeLocationを通知し登録する
-			gl.vertexAttribPointer(attL[i], attS[i], gl.FLOAT, false, 0, 0);
-		}
-	}
 
 	// マウスムーブイベントに登録する処理
 	function mouseMove(e){
@@ -237,6 +222,13 @@ function createProgram(gl, vsh, fsh) {
 
 	gl.useProgram(program);
 	return program;
+}
+
+/* VBOをシェーダのattribute変数にバインドする */
+function bindVbo2Att(gl, vbohdl, atthdl, attdim){
+	gl.bindBuffer(gl.ARRAY_BUFFER, vbohdl);							/* VBOバインド */
+	gl.enableVertexAttribArray(atthdl);								/* attribute変数を有効化 */
+	gl.vertexAttribPointer(atthdl, attdim, gl.FLOAT, false, 0, 0);	/* attribute変数に書式を通知 */
 }
 
 /* シェーダ生成 */
