@@ -83,23 +83,23 @@ mat.Matrix44.translate = function(mat, vec, retm){
 
 /* 回転行列 設定 */
 mat.Matrix44.rotate = function(mat, angle, axis, retm){
-	let sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
-	if(!sq){return null;}
-	let a = axis[0], b = axis[1], c = axis[2];
-	if(sq != 1){sq = 1 / sq; a *= sq; b *= sq; c *= sq;}
-	let d = Math.sin(angle), e = Math.cos(angle), f = 1 - e,
+	let power = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+	if(!power){return null;}
+	let xx = axis[0], yy = axis[1], zz = axis[2];
+	if(power != 1){power = 1 / power; xx *= power; yy *= power; zz *= power;}
+	let sa = Math.sin(angle), ca = Math.cos(angle), f = 1 - ca,
 		g = mat[0],  h = mat[1], i = mat[2],  j = mat[3],
 		k = mat[4],  l = mat[5], m = mat[6],  n = mat[7],
 		o = mat[8],  p = mat[9], q = mat[10], r = mat[11],
-		s = a * a * f + e,
-		t = b * a * f + c * d,
-		u = c * a * f - b * d,
-		v = a * b * f - c * d,
-		w = b * b * f + e,
-		x = c * b * f + a * d,
-		y = a * c * f + b * d,
-		z = b * c * f - a * d,
-		A = c * c * f + e;
+		s = xx * xx * f + ca,
+		t = yy * xx * f + zz * sa,
+		u = zz * xx * f - yy * sa,
+		v = xx * yy * f - zz * sa,
+		w = yy * yy * f + ca,
+		x = zz * yy * f + xx * sa,
+		y = xx * zz * f + yy * sa,
+		z = yy * zz * f - xx * sa,
+		A = zz * zz * f + ca;
 	if(angle){
 		if(mat != retm){
 			retm[12] = mat[12]; retm[13] = mat[13];
@@ -123,43 +123,73 @@ mat.Matrix44.rotate = function(mat, angle, axis, retm){
 	return retm;
 }
 
+/* 視点,ビュー中心,上位置から射影行列を生成 */
 mat.Matrix44.lookAt = function(eye, center, up, retm){
 	let eyeX    = eye[0],    eyeY    = eye[1],    eyeZ    = eye[2],
 		upX     = up[0],     upY     = up[1],     upZ     = up[2],
 		centerX = center[0], centerY = center[1], centerZ = center[2];
 	if(eyeX == centerX && eyeY == centerY && eyeZ == centerZ){return this.loadIdentity(retm);}
-	let x0, x1, x2, y0, y1, y2, z0, z1, z2, l;
-	z0 = eyeX - center[0]; z1 = eyeY - center[1]; z2 = eyeZ - center[2];
-	l = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
-	z0 *= l; z1 *= l; z2 *= l;
-	x0 = upY * z2 - upZ * z1;
-	x1 = upZ * z0 - upX * z2;
-	x2 = upX * z1 - upY * z0;
-	l = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
-	if(!l){
-		x0 = 0; x1 = 0; x2 = 0;
+
+	let fx = eyeX - centerX;
+	let fy = eyeY - centerY;
+	let fz = eyeZ - centerZ;
+	// Normalize f
+	let rlf = 1.0 / Math.sqrt(fx * fx + fy * fy + fz * fz);
+	fx *= rlf;
+	fy *= rlf;
+	fz *= rlf;
+	// compute s = f x up (x means "cross product")
+	let sx = upY * fz - upZ * fy;
+	let sy = upZ * fx - upX * fz;
+	let sz = upX * fy - upY * fx;
+	// and normalize s
+	let rls = Math.sqrt(sx * sx + sy * sy + sz * sz);
+	if(!rls){
+		sx = 0;
+		sy = 0;
+		sz = 0;
 	} else {
-		l = 1 / l;
-		x0 *= l; x1 *= l; x2 *= l;
+		rls = 1 / rls;
+		sx *= rls;
+		sy *= rls;
+		sz *= rls;
 	}
-	y0 = z1 * x2 - z2 * x1; y1 = z2 * x0 - z0 * x2; y2 = z0 * x1 - z1 * x0;
-	l = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
-	if(!l){
-		y0 = 0; y1 = 0; y2 = 0;
+	// compute u = s x f
+	let ux = fy * sz - fz * sy;
+	let uy = fz * sx - fx * sz;
+	let uz = fx * sy - fy * sx;
+	// and normalize u
+	let rlu = Math.sqrt(ux * ux + uy * uy + uz * uz);
+	if(!rlu){
+		ux = 0;
+		uy = 0;
+		uz = 0;
 	} else {
-		l = 1 / l;
-		y0 *= l; y1 *= l; y2 *= l;
+		rlu = 1 / rlu;
+		ux *= rlu;
+		uy *= rlu;
+		uz *= rlu;
 	}
-	retm[0] = x0; retm[1] = y0; retm[2]  = z0; retm[3]  = 0;
-	retm[4] = x1; retm[5] = y1; retm[6]  = z1; retm[7]  = 0;
-	retm[8] = x2; retm[9] = y2; retm[10] = z2; retm[11] = 0;
-	retm[12] = -(x0 * eyeX + x1 * eyeY + x2 * eyeZ);
-	retm[13] = -(y0 * eyeX + y1 * eyeY + y2 * eyeZ);
-	retm[14] = -(z0 * eyeX + z1 * eyeY + z2 * eyeZ);
-	retm[15] = 1;
+	retm[ 0] = sx;
+	retm[ 1] = ux;
+	retm[ 2] = fx;
+	retm[ 3] = 0.0;
+	retm[ 4] = sy;
+	retm[ 5] = uy;
+	retm[ 6] = fy;
+	retm[ 7] = 0.0;
+	retm[ 8] = sz;
+	retm[ 9] = uz;
+	retm[10] = fz;
+	retm[11] = 0.0;
+	retm[12] = -(sx * eyeX + sy * eyeY + sz * eyeZ);
+	retm[13] = -(ux * eyeX + uy * eyeY + uz * eyeZ);
+	retm[14] = -(fx * eyeX + fy * eyeY + fz * eyeZ);
+	retm[15] = 1.0;
 	return retm;
 }
 
+/* 視点形式で射影行列生成 */
 mat.Matrix44.perspective = function(fovy, aspect, near, far, retm){
 	let t = near * Math.tan(fovy * Math.PI / 360);
 	let r = t * aspect;
@@ -183,6 +213,7 @@ mat.Matrix44.perspective = function(fovy, aspect, near, far, retm){
 	return retm;
 }
 
+/* 正射影行列生成 */
 mat.Matrix44.ortho = function(left, right, top, bottom, near, far, retm) {
 	let h = (right - left);
 	let v = (top - bottom);
@@ -206,6 +237,7 @@ mat.Matrix44.ortho = function(left, right, top, bottom, near, far, retm) {
 	return retm;
 }
 
+/* 転置行列を求める */
 mat.Matrix44.transpose = function(mat, retm){
 	retm[0]  = mat[0];  retm[1]  = mat[4];
 	retm[2]  = mat[8];  retm[3]  = mat[12];
@@ -218,6 +250,7 @@ mat.Matrix44.transpose = function(mat, retm){
 	return retm;
 }
 
+/* 逆行列を求める(戻り値 true:成功/false:逆行列が存在しない) */
 mat.Matrix44.inverse = function(mat, retm){
 	let a = mat[0],  b = mat[1],  c = mat[2],  d = mat[3],
 		e = mat[4],  f = mat[5],  g = mat[6],  h = mat[7],
