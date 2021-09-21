@@ -78,12 +78,7 @@ function startWebGL(){
 	let cube = new GLCubeMolde(gl, program);
 	
 	/* 球体モデル */
-	let sphereData = sphere(64, 64, 1.0, [1.0, 1.0, 1.0, 1.0]);
-	let sPosition  = createVbo(gl, sphereData.p);
-	let sColor     = createVbo(gl, sphereData.c);
-	let sTexCoord  = createVbo(gl, sphereData.t);
-	let sVBOList   = [sPosition, sColor, sTexCoord];
-	let sIndex     = createIbo(gl, sphereData.i);
+	let spher = new GLSphereMolde(gl, program);
 	
 	/*----------- 空間定義 -----------*/
 	// uniformLocationを配列に取得
@@ -146,17 +141,18 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.perspective(45, canvas.width / canvas.height, 0.1, 10.0, pMatrix);
 		m.multiply(pMatrix, vMatrix, tmpMatrix);
 		
-		// 球体をレンダリング
-		set_attribute(sVBOList, [attPos3Col3Tex2[0].hVal, attPos3Col3Tex2[1].hVal, attPos3Col3Tex2[2].hVal,],
-								[attPos3Col3Tex2[0].size, attPos3Col3Tex2[1].size, attPos3Col3Tex2[2].size,]);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sIndex);
+		/* 球体レンダリング */
+		set_attribute(  [spher.getVboHdl(eBufType.pos)  , spher.getVboHdl(eBufType.col)  , spher.getVboHdl(eBufType.uv)], 
+						[spher.getAttrHdl(eBufType.pos) , spher.getAttrHdl(eBufType.col) , spher.getAttrHdl(eBufType.uv)],
+						[spher.getAttrSize(eBufType.pos), spher.getAttrSize(eBufType.col), spher.getAttrSize(eBufType.uv)]);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, spher.getIboHdl());
 		m.identity(mMatrix);
 		m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
 		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
 		m.multiply(tmpMatrix, mMatrix, mvpMatrix);
 		gl.uniformMatrix4fv(uniLocation[0], false, mvpMatrix);
 		gl.uniform1i(uniLocation[1], 0);
-		gl.drawElements(gl.TRIANGLES, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
+		gl.drawElements(gl.TRIANGLES, spher.getIboLen(), gl.UNSIGNED_SHORT, 0);
 		
 		/* cubeレンダリング */
 		set_attribute(	[cube.getVboHdl(eBufType.pos)  , cube.getVboHdl(eBufType.col)  , cube.getVboHdl(eBufType.uv)], 
