@@ -115,8 +115,8 @@ function startWebGL(){
 	let v = mat.Vector4;
 	let vecMouseAngle = v.LoadIdentity(v.create());
 
-/* マウスイベント設定 */
-canvas.addEventListener('mousemove', mouseMove, true);
+	/* マウスイベント設定 */
+	canvas.addEventListener('mousemove', mouseMove, true);
 
 	// 恒常ループ
 	(function(){
@@ -188,7 +188,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		requestAnimationFrame(arguments.callee);
 	})();
 
-	// マウスムーブイベントに登録する処理
+	/* マウス移動イベント */
 	function mouseMove(e){
 		let cw = canvas.width;
 		let ch = canvas.height;
