@@ -47,17 +47,22 @@ function startWebGL(){
 	/* webglコンテキスト取得 */
 	let gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
+	/*----------- GL初期化 -----------*/
+	/* 深度テスト有効 */
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LEQUAL);
+	/* カリングを有効 */
+	gl.enable(gl.CULL_FACE);
 	/* 頂点シェーダ生成 */
 	let vshader = loadShader(gl.VERTEX_SHADER  , document.getElementById('vsh').text);
 	/* フラグメントシェーダ生成 */
 	let fshader = loadShader(gl.FRAGMENT_SHADER, document.getElementById('fsh').text);
 	/* プログラム生成 */
 	let program = createProgram(vshader, fshader);
-
-	/* attribute変数sを定義 */
-	let attPos3Col3Tex2 = [ {'size': 3, 'hBuf' : gl.getAttribLocation(program, 'aPosition'),},
-							{'size': 3, 'hBuf' : gl.getAttribLocation(program, 'aColor'),   },
-							{'size': 2, 'hBuf' : gl.getAttribLocation(program, 'aTexCoord'),},];
+	/* attribute変数(s)を定義 */
+	let attPos3Col3Tex2 = [ {'size': 3, 'hVal' : gl.getAttribLocation(program, 'aPosition'),},
+							{'size': 3, 'hVal' : gl.getAttribLocation(program, 'aColor'),   },
+							{'size': 2, 'hVal' : gl.getAttribLocation(program, 'aTexCoord'),},];
 
 	/*----------- モデル定義 -----------*/
 	/* 平面 */
@@ -86,23 +91,11 @@ function startWebGL(){
 			let hColor     = create_vbo(ModelData.c);
 			let hTexCoord  = create_vbo(ModelData.t);
 			let hIndex     = create_ibo(ModelData.i);
-			return	{'vbos':{'pos': {'vbo_hdl' : hPosition, 'size': attPos3Col3Tex2[0].size, 'atr_hdl': attPos3Col3Tex2[0].hBuf},
-							 'col': {'vbo_hdl' : hColor   , 'size': attPos3Col3Tex2[1].size, 'atr_hdl': attPos3Col3Tex2[1].hBuf},
-							 'uv' : {'vbo_hdl' : hTexCoord, 'size': attPos3Col3Tex2[2].size, 'atr_hdl': attPos3Col3Tex2[2].hBuf},},
+			return	{'vbos':{'pos': {'vbo_hdl' : hPosition, 'size': attPos3Col3Tex2[0].size, 'atr_hdl': attPos3Col3Tex2[0].hVal},
+							 'col': {'vbo_hdl' : hColor   , 'size': attPos3Col3Tex2[1].size, 'atr_hdl': attPos3Col3Tex2[1].hVal},
+							 'uv' : {'vbo_hdl' : hTexCoord, 'size': attPos3Col3Tex2[2].size, 'atr_hdl': attPos3Col3Tex2[2].hVal},},
 					'ibo' : {'ibo_hdl': hIndex, 'idxlen': ModelData.i.length,},};
 		}();
-
-	// attributeLocationを配列に取得
-	let attLocation = new Array();
-	attLocation[0] = gl.getAttribLocation(program, 'aPosition');
-	attLocation[1] = gl.getAttribLocation(program, 'aColor');
-	attLocation[2] = gl.getAttribLocation(program, 'aTexCoord');
-
-	// attributeの要素数を配列に格納
-	let attStride = new Array();
-	attStride[0] = 3;
-	attStride[1] = 3;
-	attStride[2] = 2;
 
 	// キューブモデル
 	let cubeData  = cube(2.0, [1.0, 1.0, 1.0, 1.0]);
@@ -134,11 +127,6 @@ function startWebGL(){
 	let tmpMatrix = m.identity(m.create());
 	let mvpMatrix = m.identity(m.create());
 	let invMatrix = m.identity(m.create());
-	
-	// 深度テストとカリングを有効にする
-	gl.enable(gl.DEPTH_TEST);
-	gl.depthFunc(gl.LEQUAL);
-	gl.enable(gl.CULL_FACE);
 	
 	// カウンタ初期化
 	let count = 0;
@@ -189,7 +177,8 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.multiply(pMatrix, vMatrix, tmpMatrix);
 		
 		// 球体をレンダリング
-		set_attribute(sVBOList, attLocation, attStride);
+		set_attribute(sVBOList, [attPos3Col3Tex2[0].hVal, attPos3Col3Tex2[1].hVal, attPos3Col3Tex2[2].hVal,],
+								[attPos3Col3Tex2[0].size, attPos3Col3Tex2[1].size, attPos3Col3Tex2[2].size,]);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sIndex);
 		m.identity(mMatrix);
 		m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
@@ -200,7 +189,8 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		gl.drawElements(gl.TRIANGLES, sphereData.i.length, gl.UNSIGNED_SHORT, 0);
 		
 		// キューブをレンダリング
-		set_attribute(cVBOList, attLocation, attStride);
+		set_attribute(cVBOList, [attPos3Col3Tex2[0].hVal, attPos3Col3Tex2[1].hVal, attPos3Col3Tex2[2].hVal,],
+								[attPos3Col3Tex2[0].size, attPos3Col3Tex2[1].size, attPos3Col3Tex2[2].size,]);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cIndex);
 		m.identity(mMatrix);
 		m.translate(mMatrix, [-1.5, 0.0, 0.0], mMatrix);
