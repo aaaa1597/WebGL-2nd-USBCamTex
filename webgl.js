@@ -108,7 +108,7 @@ function startWebGL(){
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
 let q = mat.Vector4;
-let qt = q.identity(q.create());
+let qt = q.LoadIdentity(q.create());
 
 /* マウスイベント設定 */
 canvas.addEventListener('mousemove', mouseMove, true);
@@ -132,8 +132,8 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		// ビュー×プロジェクション座標変換行列
 		let eyePosition = new Array();
 		let camUpDirection = new Array();
-		q.toVecIII([0.0, 0.0, 7.0], qt, eyePosition);
-		q.toVecIII([0.0, 1.0, 0.0], qt, camUpDirection);
+		q.toVec3([0.0, 0.0, 7.0], qt, eyePosition);
+		q.toVec3([0.0, 1.0, 0.0], qt, camUpDirection);
 		m.lookAt(eyePosition, [0.0, 0.0, 0.0], camUpDirection, vMatrix);
 		m.perspective(45, canvas.width / canvas.height, 0.1, 10.0, pMatrix);
 		m.multiply(pMatrix, vMatrix, tmpMatrix);

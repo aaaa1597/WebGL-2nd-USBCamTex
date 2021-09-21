@@ -284,81 +284,79 @@ mat.Matrix44.inverse = function(mat, retm){
 
 mat.Vector4 = {};
 mat.Vector4.create = function(){
-	return new Float32Array(4);
+	return [0,0,0,0,];
 }
 
-mat.Vector4.identity = function(retvec){
+mat.Vector4.LoadIdentity = function(retvec){
 	retvec[0] = 0; retvec[1] = 0; retvec[2] = 0; retvec[3] = 1;
 	return retvec;
 }
 
-mat.Vector4.inverse = function(qtn, retvec){
-	retvec[0] = -qtn[0];
-	retvec[1] = -qtn[1];
-	retvec[2] = -qtn[2];
-	retvec[3] =  qtn[3];
+mat.Vector4.inverse = function(vec, retvec){
+	retvec[0] = -vec[0];
+	retvec[1] = -vec[1];
+	retvec[2] = -vec[2];
+	retvec[3] =  vec[3];
 	return retvec;
 }
 
 mat.Vector4.normalize = function(retvec){
 	let x = retvec[0], y = retvec[1], z = retvec[2], w = retvec[3];
-	let l = Math.sqrt(x * x + y * y + z * z + w * w);
-	if(l === 0){
+	let power = Math.sqrt(x * x + y * y + z * z + w * w);
+	if(power === 0){
 		retvec[0] = 0;
 		retvec[1] = 0;
 		retvec[2] = 0;
 		retvec[3] = 0;
 	}else{
-		l = 1 / l;
-		retvec[0] = x * l;
-		retvec[1] = y * l;
-		retvec[2] = z * l;
-		retvec[3] = w * l;
+		power = 1 / power;
+		retvec[0] = x * power;
+		retvec[1] = y * power;
+		retvec[2] = z * power;
+		retvec[3] = w * power;
 	}
 	return retvec;
 }
 
-mat.Vector4.multiply = function(qtn1, qtn2, retvec){
-	let ax = qtn1[0], ay = qtn1[1], az = qtn1[2], aw = qtn1[3];
-	let bx = qtn2[0], by = qtn2[1], bz = qtn2[2], bw = qtn2[3];
-	retvec[0] = ax * bw + aw * bx + ay * bz - az * by;
-	retvec[1] = ay * bw + aw * by + az * bx - ax * bz;
-	retvec[2] = az * bw + aw * bz + ax * by - ay * bx;
-	retvec[3] = aw * bw - ax * bx - ay * by - az * bz;
+mat.Vector4.multiply = function(lvec, rvec, retvec){
+	retvec[0] = lvec[0] * rvec[3] + lvec[3] * rvec[0] + lvec[1] * rvec[2] - lvec[2] * rvec[1];
+	retvec[1] = lvec[1] * rvec[3] + lvec[3] * rvec[1] + lvec[2] * rvec[0] - lvec[0] * rvec[2];
+	retvec[2] = lvec[2] * rvec[3] + lvec[3] * rvec[2] + lvec[0] * rvec[1] - lvec[1] * rvec[0];
+	retvec[3] = lvec[3] * rvec[3] - lvec[0] * rvec[0] - lvec[1] * rvec[1] - lvec[2] * rvec[2];
 	return retvec;
 }
 
 mat.Vector4.rotate = function(angle, axis, retvec){
-	let sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
-	if(!sq){return null;}
-	let a = axis[0], b = axis[1], c = axis[2];
-	if(sq != 1){sq = 1 / sq; a *= sq; b *= sq; c *= sq;}
+	let power = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+	if(!power){return null;}
+	let x = axis[0], y = axis[1], z = axis[2];
+	if(power != 1){power = 1 / power; x *= power; y *= power; z *= power;}
 	let s = Math.sin(angle * 0.5);
-	retvec[0] = a * s;
-	retvec[1] = b * s;
-	retvec[2] = c * s;
+	retvec[0] = x * s;
+	retvec[1] = y * s;
+	retvec[2] = z * s;
 	retvec[3] = Math.cos(angle * 0.5);
 	return retvec;
 }
 
-mat.Vector4.toVecIII = function(vec, qtn, retvec){
+mat.Vector4.toVec3 = function(lvec, rvec, retvec){
 	let qp = this.create();
 	let qq = this.create();
 	let qr = this.create();
-mat.Vector4.inverse(qtn, qr);
-	qp[0] = vec[0];
-	qp[1] = vec[1];
-	qp[2] = vec[2];
-mat.Vector4.multiply(qr, qp, qq);
-mat.Vector4.multiply(qq, qtn, qr);
+	mat.Vector4.inverse(rvec, qr);
+	qp[0] = lvec[0];
+	qp[1] = lvec[1];
+	qp[2] = lvec[2];
+	mat.Vector4.multiply(qr, qp, qq);
+	mat.Vector4.multiply(qq, rvec, qr);
 	retvec[0] = qr[0];
 	retvec[1] = qr[1];
 	retvec[2] = qr[2];
 	return retvec;
 }
 
-mat.Vector4.toMatIV = function(qtn, retvec){
-	let x = qtn[0], y = qtn[1], z = qtn[2], w = qtn[3];
+mat.Vector4.toMatrix44 = function(lvec, retvec){
+	let x = lvec[0], y = lvec[1], z = lvec[2], w = lvec[3];
 	let x2 = x + x, y2 = y + y, z2 = z + z;
 	let xx = x * x2, xy = x * y2, xz = x * z2;
 	let yy = y * y2, yz = y * z2, zz = z * z2;
@@ -409,45 +407,6 @@ mat.Vector4.slerp = function(qtn1, qtn2, time, retvec){
 		}
 	}
 	return retvec;
-}
-
-function torus(row, column, irad, orad, color){
-	let pos = new Array(), nor = new Array(),
-	    col = new Array(), st  = new Array(), idx = new Array();
-	for(let i = 0; i <= row; i++){
-		let r = Math.PI * 2 / row * i;
-		let rr = Math.cos(r);
-		let ry = Math.sin(r);
-		for(let ii = 0; ii <= column; ii++){
-			let tr = Math.PI * 2 / column * ii;
-			let tx = (rr * irad + orad) * Math.cos(tr);
-			let ty = ry * irad;
-			let tz = (rr * irad + orad) * Math.sin(tr);
-			let rx = rr * Math.cos(tr);
-			let rz = rr * Math.sin(tr);
-			if(color){
-				let tc = color;
-			}else{
-				tc = hsva(360 / column * ii, 1, 1, 1);
-			}
-			let rs = 1 / column * ii;
-			let rt = 1 / row * i + 0.5;
-			if(rt > 1.0){rt -= 1.0;}
-			rt = 1.0 - rt;
-			pos.push(tx, ty, tz);
-			nor.push(rx, ry, rz);
-			col.push(tc[0], tc[1], tc[2], tc[3]);
-			st.push(rs, rt);
-		}
-	}
-	for(i = 0; i < row; i++){
-		for(ii = 0; ii < column; ii++){
-			r = (column + 1) * i + ii;
-			idx.push(r, r + column + 1, r + 1);
-			idx.push(r + column + 1, r + column + 2, r + 1);
-		}
-	}
-	return {p : pos, n : nor, c : col, t : st, i : idx};
 }
 
 function createRgbaformhsva(h, s, v, a){
