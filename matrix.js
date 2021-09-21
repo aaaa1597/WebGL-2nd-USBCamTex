@@ -13,82 +13,81 @@ mat.Matrix44.createIdentity = function(){
 			0,0,0,1];
 }
 
-mat.Matrix44.loadIdentity = function(retmat){
-	retmat[ 0] = 1; retmat[ 1] = 0; retmat[ 2] = 0; retmat[ 3] = 0;
-	retmat[ 4] = 0; retmat[ 5] = 1; retmat[ 6] = 0; retmat[ 7] = 0;
-	retmat[ 8] = 0; retmat[ 9] = 0; retmat[10] = 1; retmat[11] = 0;
-	retmat[12] = 0; retmat[13] = 0; retmat[14] = 0; retmat[15] = 1;
-	return retmat;
+mat.Matrix44.loadIdentity = function(retm){
+	retm[ 0] = 1; retm[ 1] = 0; retm[ 2] = 0; retm[ 3] = 0;
+	retm[ 4] = 0; retm[ 5] = 1; retm[ 6] = 0; retm[ 7] = 0;
+	retm[ 8] = 0; retm[ 9] = 0; retm[10] = 1; retm[11] = 0;
+	retm[12] = 0; retm[13] = 0; retm[14] = 0; retm[15] = 1;
+	return retm;
 }
 
-mat.Matrix44.multiply = function(mat1, mat2, retmat){
-	var a = mat1[0],  b = mat1[1],  c = mat1[2],  d = mat1[3],
-		e = mat1[4],  f = mat1[5],  g = mat1[6],  h = mat1[7],
-		i = mat1[8],  j = mat1[9],  k = mat1[10], l = mat1[11],
-		m = mat1[12], n = mat1[13], o = mat1[14], p = mat1[15],
-		A = mat2[0],  B = mat2[1],  C = mat2[2],  D = mat2[3],
-		E = mat2[4],  F = mat2[5],  G = mat2[6],  H = mat2[7],
-		I = mat2[8],  J = mat2[9],  K = mat2[10], L = mat2[11],
-		M = mat2[12], N = mat2[13], O = mat2[14], P = mat2[15];
-	retmat[ 0] = A * a + B * e + C * i + D * m;
-	retmat[ 1] = A * b + B * f + C * j + D * n;
-	retmat[ 2] = A * c + B * g + C * k + D * o;
-	retmat[ 3] = A * d + B * h + C * l + D * p;
+/* クォータニオン同士の掛け算 */
+mat.Matrix44.multiply = function(lhs, rhs, retm){
+	retm[ 0] = rhs[ 0] * lhs[0] + rhs[ 1] * lhs[4] + rhs[ 2] * lhs[ 8] + rhs[ 3] * lhs[12];
+	retm[ 1] = rhs[ 0] * lhs[1] + rhs[ 1] * lhs[5] + rhs[ 2] * lhs[ 9] + rhs[ 3] * lhs[13];
+	retm[ 2] = rhs[ 0] * lhs[2] + rhs[ 1] * lhs[6] + rhs[ 2] * lhs[10] + rhs[ 3] * lhs[14];
+	retm[ 3] = rhs[ 0] * lhs[3] + rhs[ 1] * lhs[7] + rhs[ 2] * lhs[11] + rhs[ 3] * lhs[15];
 
-	retmat[ 4] = E * a + F * e + G * i + H * m;
-	retmat[ 5] = E * b + F * f + G * j + H * n;
-	retmat[ 6] = E * c + F * g + G * k + H * o;
-	retmat[ 7] = E * d + F * h + G * l + H * p;
+	retm[ 4] = rhs[ 4] * lhs[0] + rhs[ 5] * lhs[4] + rhs[ 6] * lhs[ 8] + rhs[ 7] * lhs[12];
+	retm[ 5] = rhs[ 4] * lhs[1] + rhs[ 5] * lhs[5] + rhs[ 6] * lhs[ 9] + rhs[ 7] * lhs[13];
+	retm[ 6] = rhs[ 4] * lhs[2] + rhs[ 5] * lhs[6] + rhs[ 6] * lhs[10] + rhs[ 7] * lhs[14];
+	retm[ 7] = rhs[ 4] * lhs[3] + rhs[ 5] * lhs[7] + rhs[ 6] * lhs[11] + rhs[ 7] * lhs[15];
 
-	retmat[ 8] = I * a + J * e + K * i + L * m;
-	retmat[ 9] = I * b + J * f + K * j + L * n;
-	retmat[10] = I * c + J * g + K * k + L * o;
-	retmat[11] = I * d + J * h + K * l + L * p;
+	retm[ 8] = rhs[ 8] * lhs[0] + rhs[ 9] * lhs[4] + rhs[10] * lhs[ 8] + rhs[11] * lhs[12];
+	retm[ 9] = rhs[ 8] * lhs[1] + rhs[ 9] * lhs[5] + rhs[10] * lhs[ 9] + rhs[11] * lhs[13];
+	retm[10] = rhs[ 8] * lhs[2] + rhs[ 9] * lhs[6] + rhs[10] * lhs[10] + rhs[11] * lhs[14];
+	retm[11] = rhs[ 8] * lhs[3] + rhs[ 9] * lhs[7] + rhs[10] * lhs[11] + rhs[11] * lhs[15];
 
-	retmat[12] = M * a + N * e + O * i + P * m;
-	retmat[13] = M * b + N * f + O * j + P * n;
-	retmat[14] = M * c + N * g + O * k + P * o;
-	retmat[15] = M * d + N * h + O * l + P * p;
-	return retmat;
+	retm[12] = rhs[12] * lhs[0] + rhs[13] * lhs[4] + rhs[14] * lhs[ 8] + rhs[15] * lhs[12];
+	retm[13] = rhs[12] * lhs[1] + rhs[13] * lhs[5] + rhs[14] * lhs[ 9] + rhs[15] * lhs[13];
+	retm[14] = rhs[12] * lhs[2] + rhs[13] * lhs[6] + rhs[14] * lhs[10] + rhs[15] * lhs[14];
+	retm[15] = rhs[12] * lhs[3] + rhs[13] * lhs[7] + rhs[14] * lhs[11] + rhs[15] * lhs[15];
+	return retm;
 }
 
-mat.Matrix44.scale = function(mat, vec, retmat){
-	retmat[0]  = mat[0]  * vec[0];
-	retmat[1]  = mat[1]  * vec[0];
-	retmat[2]  = mat[2]  * vec[0];
-	retmat[3]  = mat[3]  * vec[0];
-	retmat[4]  = mat[4]  * vec[1];
-	retmat[5]  = mat[5]  * vec[1];
-	retmat[6]  = mat[6]  * vec[1];
-	retmat[7]  = mat[7]  * vec[1];
-	retmat[8]  = mat[8]  * vec[2];
-	retmat[9]  = mat[9]  * vec[2];
-	retmat[10] = mat[10] * vec[2];
-	retmat[11] = mat[11] * vec[2];
-	retmat[12] = mat[12];
-	retmat[13] = mat[13];
-	retmat[14] = mat[14];
-	retmat[15] = mat[15];
-	return retmat;
+/* 拡縮行列 生成 */
+mat.Matrix44.scale = function(mat, vec, retm){
+	retm[ 0] = mat[ 0] * vec[0];
+	retm[ 1] = mat[ 1] * vec[0];
+	retm[ 2] = mat[ 2] * vec[0];
+	retm[ 3] = mat[ 3] * vec[0];
+
+	retm[ 4] = mat[ 4] * vec[1];
+	retm[ 5] = mat[ 5] * vec[1];
+	retm[ 6] = mat[ 6] * vec[1];
+	retm[ 7] = mat[ 7] * vec[1];
+
+	retm[ 8] = mat[ 8] * vec[2];
+	retm[ 9] = mat[ 9] * vec[2];
+	retm[10] = mat[10] * vec[2];
+	retm[11] = mat[11] * vec[2];
+
+	retm[12] = mat[12];
+	retm[13] = mat[13];
+	retm[14] = mat[14];
+	retm[15] = mat[15];
+	return retm;
 }
 
-mat.Matrix44.translate = function(mat, vec, retmat){
-	retmat[0] = mat[0]; retmat[1] = mat[1]; retmat[2]  = mat[2];  retmat[3]  = mat[3];
-	retmat[4] = mat[4]; retmat[5] = mat[5]; retmat[6]  = mat[6];  retmat[7]  = mat[7];
-	retmat[8] = mat[8]; retmat[9] = mat[9]; retmat[10] = mat[10]; retmat[11] = mat[11];
-	retmat[12] = mat[0] * vec[0] + mat[4] * vec[1] + mat[8]  * vec[2] + mat[12];
-	retmat[13] = mat[1] * vec[0] + mat[5] * vec[1] + mat[9]  * vec[2] + mat[13];
-	retmat[14] = mat[2] * vec[0] + mat[6] * vec[1] + mat[10] * vec[2] + mat[14];
-	retmat[15] = mat[3] * vec[0] + mat[7] * vec[1] + mat[11] * vec[2] + mat[15];
-	return retmat;
+/* 移動行列 生成 */
+mat.Matrix44.translate = function(mat, vec, retm){
+	retm[ 0] = mat[0]; retm[1] = mat[1]; retm[ 2] = mat[ 2]; retm[ 3] = mat[ 3];
+	retm[ 4] = mat[4]; retm[5] = mat[5]; retm[ 6] = mat[ 6]; retm[ 7] = mat[ 7];
+	retm[ 8] = mat[8]; retm[9] = mat[9]; retm[10] = mat[10]; retm[11] = mat[11];
+	retm[12] = mat[0] * vec[0] + mat[4] * vec[1] + mat[ 8] * vec[2] + mat[12];
+	retm[13] = mat[1] * vec[0] + mat[5] * vec[1] + mat[ 9] * vec[2] + mat[13];
+	retm[14] = mat[2] * vec[0] + mat[6] * vec[1] + mat[10] * vec[2] + mat[14];
+	retm[15] = mat[3] * vec[0] + mat[7] * vec[1] + mat[11] * vec[2] + mat[15];
+	return retm;
 }
 
-mat.Matrix44.rotate = function(mat, angle, axis, retmat){
-	var sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+/* 回転行列 設定 */
+mat.Matrix44.rotate = function(mat, angle, axis, retm){
+	let sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
 	if(!sq){return null;}
-	var a = axis[0], b = axis[1], c = axis[2];
+	let a = axis[0], b = axis[1], c = axis[2];
 	if(sq != 1){sq = 1 / sq; a *= sq; b *= sq; c *= sq;}
-	var d = Math.sin(angle), e = Math.cos(angle), f = 1 - e,
+	let d = Math.sin(angle), e = Math.cos(angle), f = 1 - e,
 		g = mat[0],  h = mat[1], i = mat[2],  j = mat[3],
 		k = mat[4],  l = mat[5], m = mat[6],  n = mat[7],
 		o = mat[8],  p = mat[9], q = mat[10], r = mat[11],
@@ -102,34 +101,34 @@ mat.Matrix44.rotate = function(mat, angle, axis, retmat){
 		z = b * c * f - a * d,
 		A = c * c * f + e;
 	if(angle){
-		if(mat != retmat){
-			retmat[12] = mat[12]; retmat[13] = mat[13];
-			retmat[14] = mat[14]; retmat[15] = mat[15];
+		if(mat != retm){
+			retm[12] = mat[12]; retm[13] = mat[13];
+			retm[14] = mat[14]; retm[15] = mat[15];
 		}
 	} else {
-		retmat = mat;
+		retm = mat;
 	}
-	retmat[0]  = g * s + k * t + o * u;
-	retmat[1]  = h * s + l * t + p * u;
-	retmat[2]  = i * s + m * t + q * u;
-	retmat[3]  = j * s + n * t + r * u;
-	retmat[4]  = g * v + k * w + o * x;
-	retmat[5]  = h * v + l * w + p * x;
-	retmat[6]  = i * v + m * w + q * x;
-	retmat[7]  = j * v + n * w + r * x;
-	retmat[8]  = g * y + k * z + o * A;
-	retmat[9]  = h * y + l * z + p * A;
-	retmat[10] = i * y + m * z + q * A;
-	retmat[11] = j * y + n * z + r * A;
-	return retmat;
+	retm[0]  = g * s + k * t + o * u;
+	retm[1]  = h * s + l * t + p * u;
+	retm[2]  = i * s + m * t + q * u;
+	retm[3]  = j * s + n * t + r * u;
+	retm[4]  = g * v + k * w + o * x;
+	retm[5]  = h * v + l * w + p * x;
+	retm[6]  = i * v + m * w + q * x;
+	retm[7]  = j * v + n * w + r * x;
+	retm[8]  = g * y + k * z + o * A;
+	retm[9]  = h * y + l * z + p * A;
+	retm[10] = i * y + m * z + q * A;
+	retm[11] = j * y + n * z + r * A;
+	return retm;
 }
 
-mat.Matrix44.lookAt = function(eye, center, up, retmat){
-	var eyeX    = eye[0],    eyeY    = eye[1],    eyeZ    = eye[2],
+mat.Matrix44.lookAt = function(eye, center, up, retm){
+	let eyeX    = eye[0],    eyeY    = eye[1],    eyeZ    = eye[2],
 		upX     = up[0],     upY     = up[1],     upZ     = up[2],
 		centerX = center[0], centerY = center[1], centerZ = center[2];
-	if(eyeX == centerX && eyeY == centerY && eyeZ == centerZ){return this.loadIdentity(retmat);}
-	var x0, x1, x2, y0, y1, y2, z0, z1, z2, l;
+	if(eyeX == centerX && eyeY == centerY && eyeZ == centerZ){return this.loadIdentity(retm);}
+	let x0, x1, x2, y0, y1, y2, z0, z1, z2, l;
 	z0 = eyeX - center[0]; z1 = eyeY - center[1]; z2 = eyeZ - center[2];
 	l = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
 	z0 *= l; z1 *= l; z2 *= l;
@@ -151,76 +150,76 @@ mat.Matrix44.lookAt = function(eye, center, up, retmat){
 		l = 1 / l;
 		y0 *= l; y1 *= l; y2 *= l;
 	}
-	retmat[0] = x0; retmat[1] = y0; retmat[2]  = z0; retmat[3]  = 0;
-	retmat[4] = x1; retmat[5] = y1; retmat[6]  = z1; retmat[7]  = 0;
-	retmat[8] = x2; retmat[9] = y2; retmat[10] = z2; retmat[11] = 0;
-	retmat[12] = -(x0 * eyeX + x1 * eyeY + x2 * eyeZ);
-	retmat[13] = -(y0 * eyeX + y1 * eyeY + y2 * eyeZ);
-	retmat[14] = -(z0 * eyeX + z1 * eyeY + z2 * eyeZ);
-	retmat[15] = 1;
-	return retmat;
+	retm[0] = x0; retm[1] = y0; retm[2]  = z0; retm[3]  = 0;
+	retm[4] = x1; retm[5] = y1; retm[6]  = z1; retm[7]  = 0;
+	retm[8] = x2; retm[9] = y2; retm[10] = z2; retm[11] = 0;
+	retm[12] = -(x0 * eyeX + x1 * eyeY + x2 * eyeZ);
+	retm[13] = -(y0 * eyeX + y1 * eyeY + y2 * eyeZ);
+	retm[14] = -(z0 * eyeX + z1 * eyeY + z2 * eyeZ);
+	retm[15] = 1;
+	return retm;
 }
 
-mat.Matrix44.perspective = function(fovy, aspect, near, far, retmat){
-	var t = near * Math.tan(fovy * Math.PI / 360);
-	var r = t * aspect;
-	var a = r * 2, b = t * 2, c = far - near;
-	retmat[0]  = near * 2 / a;
-	retmat[1]  = 0;
-	retmat[2]  = 0;
-	retmat[3]  = 0;
-	retmat[4]  = 0;
-	retmat[5]  = near * 2 / b;
-	retmat[6]  = 0;
-	retmat[7]  = 0;
-	retmat[8]  = 0;
-	retmat[9]  = 0;
-	retmat[10] = -(far + near) / c;
-	retmat[11] = -1;
-	retmat[12] = 0;
-	retmat[13] = 0;
-	retmat[14] = -(far * near * 2) / c;
-	retmat[15] = 0;
-	return retmat;
+mat.Matrix44.perspective = function(fovy, aspect, near, far, retm){
+	let t = near * Math.tan(fovy * Math.PI / 360);
+	let r = t * aspect;
+	let a = r * 2, b = t * 2, c = far - near;
+	retm[0]  = near * 2 / a;
+	retm[1]  = 0;
+	retm[2]  = 0;
+	retm[3]  = 0;
+	retm[4]  = 0;
+	retm[5]  = near * 2 / b;
+	retm[6]  = 0;
+	retm[7]  = 0;
+	retm[8]  = 0;
+	retm[9]  = 0;
+	retm[10] = -(far + near) / c;
+	retm[11] = -1;
+	retm[12] = 0;
+	retm[13] = 0;
+	retm[14] = -(far * near * 2) / c;
+	retm[15] = 0;
+	return retm;
 }
 
-mat.Matrix44.ortho = function(left, right, top, bottom, near, far, retmat) {
-	var h = (right - left);
-	var v = (top - bottom);
-	var d = (far - near);
-	retmat[0]  = 2 / h;
-	retmat[1]  = 0;
-	retmat[2]  = 0;
-	retmat[3]  = 0;
-	retmat[4]  = 0;
-	retmat[5]  = 2 / v;
-	retmat[6]  = 0;
-	retmat[7]  = 0;
-	retmat[8]  = 0;
-	retmat[9]  = 0;
-	retmat[10] = -2 / d;
-	retmat[11] = 0;
-	retmat[12] = -(left + right) / h;
-	retmat[13] = -(top + bottom) / v;
-	retmat[14] = -(far + near) / d;
-	retmat[15] = 1;
-	return retmat;
+mat.Matrix44.ortho = function(left, right, top, bottom, near, far, retm) {
+	let h = (right - left);
+	let v = (top - bottom);
+	let d = (far - near);
+	retm[0]  = 2 / h;
+	retm[1]  = 0;
+	retm[2]  = 0;
+	retm[3]  = 0;
+	retm[4]  = 0;
+	retm[5]  = 2 / v;
+	retm[6]  = 0;
+	retm[7]  = 0;
+	retm[8]  = 0;
+	retm[9]  = 0;
+	retm[10] = -2 / d;
+	retm[11] = 0;
+	retm[12] = -(left + right) / h;
+	retm[13] = -(top + bottom) / v;
+	retm[14] = -(far + near) / d;
+	retm[15] = 1;
+	return retm;
 }
 
-mat.Matrix44.transpose = function(mat, retmat){
-	retmat[0]  = mat[0];  retmat[1]  = mat[4];
-	retmat[2]  = mat[8];  retmat[3]  = mat[12];
-	retmat[4]  = mat[1];  retmat[5]  = mat[5];
-	retmat[6]  = mat[9];  retmat[7]  = mat[13];
-	retmat[8]  = mat[2];  retmat[9]  = mat[6];
-	retmat[10] = mat[10]; retmat[11] = mat[14];
-	retmat[12] = mat[3];  retmat[13] = mat[7];
-	retmat[14] = mat[11]; retmat[15] = mat[15];
-	return retmat;
+mat.Matrix44.transpose = function(mat, retm){
+	retm[0]  = mat[0];  retm[1]  = mat[4];
+	retm[2]  = mat[8];  retm[3]  = mat[12];
+	retm[4]  = mat[1];  retm[5]  = mat[5];
+	retm[6]  = mat[9];  retm[7]  = mat[13];
+	retm[8]  = mat[2];  retm[9]  = mat[6];
+	retm[10] = mat[10]; retm[11] = mat[14];
+	retm[12] = mat[3];  retm[13] = mat[7];
+	retm[14] = mat[11]; retm[15] = mat[15];
+	return retm;
 }
 
-mat.Matrix44.inverse = function(mat, retmat){
-	var a = mat[0],  b = mat[1],  c = mat[2],  d = mat[3],
+mat.Matrix44.inverse = function(mat, retm){
+	let a = mat[0],  b = mat[1],  c = mat[2],  d = mat[3],
 		e = mat[4],  f = mat[5],  g = mat[6],  h = mat[7],
 		i = mat[8],  j = mat[9],  k = mat[10], l = mat[11],
 		m = mat[12], n = mat[13], o = mat[14], p = mat[15],
@@ -231,23 +230,23 @@ mat.Matrix44.inverse = function(mat, retmat){
 		y = i * p - l * m, z = j * o - k * n,
 		A = j * p - l * n, B = k * p - l * o,
 		ivd = 1 / (q * B - r * A + s * z + t * y - u * x + v * w);
-	retmat[0]  = ( f * B - g * A + h * z) * ivd;
-	retmat[1]  = (-b * B + c * A - d * z) * ivd;
-	retmat[2]  = ( n * v - o * u + p * t) * ivd;
-	retmat[3]  = (-j * v + k * u - l * t) * ivd;
-	retmat[4]  = (-e * B + g * y - h * x) * ivd;
-	retmat[5]  = ( a * B - c * y + d * x) * ivd;
-	retmat[6]  = (-m * v + o * s - p * r) * ivd;
-	retmat[7]  = ( i * v - k * s + l * r) * ivd;
-	retmat[8]  = ( e * A - f * y + h * w) * ivd;
-	retmat[9]  = (-a * A + b * y - d * w) * ivd;
-	retmat[10] = ( m * u - n * s + p * q) * ivd;
-	retmat[11] = (-i * u + j * s - l * q) * ivd;
-	retmat[12] = (-e * z + f * x - g * w) * ivd;
-	retmat[13] = ( a * z - b * x + c * w) * ivd;
-	retmat[14] = (-m * t + n * r - o * q) * ivd;
-	retmat[15] = ( i * t - j * r + k * q) * ivd;
-	return retmat;
+	retm[0]  = ( f * B - g * A + h * z) * ivd;
+	retm[1]  = (-b * B + c * A - d * z) * ivd;
+	retm[2]  = ( n * v - o * u + p * t) * ivd;
+	retm[3]  = (-j * v + k * u - l * t) * ivd;
+	retm[4]  = (-e * B + g * y - h * x) * ivd;
+	retm[5]  = ( a * B - c * y + d * x) * ivd;
+	retm[6]  = (-m * v + o * s - p * r) * ivd;
+	retm[7]  = ( i * v - k * s + l * r) * ivd;
+	retm[8]  = ( e * A - f * y + h * w) * ivd;
+	retm[9]  = (-a * A + b * y - d * w) * ivd;
+	retm[10] = ( m * u - n * s + p * q) * ivd;
+	retm[11] = (-i * u + j * s - l * q) * ivd;
+	retm[12] = (-e * z + f * x - g * w) * ivd;
+	retm[13] = ( a * z - b * x + c * w) * ivd;
+	retm[14] = (-m * t + n * r - o * q) * ivd;
+	retm[15] = ( i * t - j * r + k * q) * ivd;
+	return retm;
 }
 
 mat.Vector4 = {};
@@ -269,8 +268,8 @@ mat.Vector4.inverse = function(qtn, retvec){
 }
 
 mat.Vector4.normalize = function(retvec){
-	var x = retvec[0], y = retvec[1], z = retvec[2], w = retvec[3];
-	var l = Math.sqrt(x * x + y * y + z * z + w * w);
+	let x = retvec[0], y = retvec[1], z = retvec[2], w = retvec[3];
+	let l = Math.sqrt(x * x + y * y + z * z + w * w);
 	if(l === 0){
 		retvec[0] = 0;
 		retvec[1] = 0;
@@ -287,8 +286,8 @@ mat.Vector4.normalize = function(retvec){
 }
 
 mat.Vector4.multiply = function(qtn1, qtn2, retvec){
-	var ax = qtn1[0], ay = qtn1[1], az = qtn1[2], aw = qtn1[3];
-	var bx = qtn2[0], by = qtn2[1], bz = qtn2[2], bw = qtn2[3];
+	let ax = qtn1[0], ay = qtn1[1], az = qtn1[2], aw = qtn1[3];
+	let bx = qtn2[0], by = qtn2[1], bz = qtn2[2], bw = qtn2[3];
 	retvec[0] = ax * bw + aw * bx + ay * bz - az * by;
 	retvec[1] = ay * bw + aw * by + az * bx - ax * bz;
 	retvec[2] = az * bw + aw * bz + ax * by - ay * bx;
@@ -297,11 +296,11 @@ mat.Vector4.multiply = function(qtn1, qtn2, retvec){
 }
 
 mat.Vector4.rotate = function(angle, axis, retvec){
-	var sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+	let sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
 	if(!sq){return null;}
-	var a = axis[0], b = axis[1], c = axis[2];
+	let a = axis[0], b = axis[1], c = axis[2];
 	if(sq != 1){sq = 1 / sq; a *= sq; b *= sq; c *= sq;}
-	var s = Math.sin(angle * 0.5);
+	let s = Math.sin(angle * 0.5);
 	retvec[0] = a * s;
 	retvec[1] = b * s;
 	retvec[2] = c * s;
@@ -310,9 +309,9 @@ mat.Vector4.rotate = function(angle, axis, retvec){
 }
 
 mat.Vector4.toVecIII = function(vec, qtn, retvec){
-	var qp = this.create();
-	var qq = this.create();
-	var qr = this.create();
+	let qp = this.create();
+	let qq = this.create();
+	let qr = this.create();
 mat.Vector4.inverse(qtn, qr);
 	qp[0] = vec[0];
 	qp[1] = vec[1];
@@ -326,11 +325,11 @@ mat.Vector4.multiply(qq, qtn, qr);
 }
 
 mat.Vector4.toMatIV = function(qtn, retvec){
-	var x = qtn[0], y = qtn[1], z = qtn[2], w = qtn[3];
-	var x2 = x + x, y2 = y + y, z2 = z + z;
-	var xx = x * x2, xy = x * y2, xz = x * z2;
-	var yy = y * y2, yz = y * z2, zz = z * z2;
-	var wx = w * x2, wy = w * y2, wz = w * z2;
+	let x = qtn[0], y = qtn[1], z = qtn[2], w = qtn[3];
+	let x2 = x + x, y2 = y + y, z2 = z + z;
+	let xx = x * x2, xy = x * y2, xz = x * z2;
+	let yy = y * y2, yz = y * z2, zz = z * z2;
+	let wx = w * x2, wy = w * y2, wz = w * z2;
 	retvec[0]  = 1 - (yy + zz);
 	retvec[1]  = xy - wz;
 	retvec[2]  = xz + wy;
@@ -351,8 +350,8 @@ mat.Vector4.toMatIV = function(qtn, retvec){
 }
 
 mat.Vector4.slerp = function(qtn1, qtn2, time, retvec){
-	var ht = qtn1[0] * qtn2[0] + qtn1[1] * qtn2[1] + qtn1[2] * qtn2[2] + qtn1[3] * qtn2[3];
-	var hs = 1.0 - ht * ht;
+	let ht = qtn1[0] * qtn2[0] + qtn1[1] * qtn2[1] + qtn1[2] * qtn2[2] + qtn1[3] * qtn2[3];
+	let hs = 1.0 - ht * ht;
 	if(hs <= 0.0){
 		retvec[0] = qtn1[0];
 		retvec[1] = qtn1[1];
@@ -366,10 +365,10 @@ mat.Vector4.slerp = function(qtn1, qtn2, time, retvec){
 			retvec[2] = (qtn1[2] * 0.5 + qtn2[2] * 0.5);
 			retvec[3] = (qtn1[3] * 0.5 + qtn2[3] * 0.5);
 		}else{
-			var ph = Math.acos(ht);
-			var pt = ph * time;
-			var t0 = Math.sin(ph - pt) / hs;
-			var t1 = Math.sin(pt) / hs;
+			let ph = Math.acos(ht);
+			let pt = ph * time;
+			let t0 = Math.sin(ph - pt) / hs;
+			let t1 = Math.sin(pt) / hs;
 			retvec[0] = qtn1[0] * t0 + qtn2[0] * t1;
 			retvec[1] = qtn1[1] * t0 + qtn2[1] * t1;
 			retvec[2] = qtn1[2] * t0 + qtn2[2] * t1;
@@ -380,26 +379,26 @@ mat.Vector4.slerp = function(qtn1, qtn2, time, retvec){
 }
 
 function torus(row, column, irad, orad, color){
-	var pos = new Array(), nor = new Array(),
+	let pos = new Array(), nor = new Array(),
 	    col = new Array(), st  = new Array(), idx = new Array();
-	for(var i = 0; i <= row; i++){
-		var r = Math.PI * 2 / row * i;
-		var rr = Math.cos(r);
-		var ry = Math.sin(r);
-		for(var ii = 0; ii <= column; ii++){
-			var tr = Math.PI * 2 / column * ii;
-			var tx = (rr * irad + orad) * Math.cos(tr);
-			var ty = ry * irad;
-			var tz = (rr * irad + orad) * Math.sin(tr);
-			var rx = rr * Math.cos(tr);
-			var rz = rr * Math.sin(tr);
+	for(let i = 0; i <= row; i++){
+		let r = Math.PI * 2 / row * i;
+		let rr = Math.cos(r);
+		let ry = Math.sin(r);
+		for(let ii = 0; ii <= column; ii++){
+			let tr = Math.PI * 2 / column * ii;
+			let tx = (rr * irad + orad) * Math.cos(tr);
+			let ty = ry * irad;
+			let tz = (rr * irad + orad) * Math.sin(tr);
+			let rx = rr * Math.cos(tr);
+			let rz = rr * Math.sin(tr);
 			if(color){
-				var tc = color;
+				let tc = color;
 			}else{
 				tc = hsva(360 / column * ii, 1, 1, 1);
 			}
-			var rs = 1 / column * ii;
-			var rt = 1 / row * i + 0.5;
+			let rs = 1 / column * ii;
+			let rt = 1 / row * i + 0.5;
 			if(rt > 1.0){rt -= 1.0;}
 			rt = 1.0 - rt;
 			pos.push(tx, ty, tz);

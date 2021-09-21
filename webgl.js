@@ -117,18 +117,18 @@ canvas.addEventListener('mousemove', mouseMove, true);
 	(function(){
 		// カウンタをインクリメントする
 		count++;
-		
+
 		// カウンタを元にラジアンを算出
 		let rad  = (count % 360) * Math.PI / 180;
-		
+
 		// canvasを初期化
 		gl.clearColor(0.0, 0.7, 0.7, 1.0);
 		gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		
+
 		// テクスチャを更新する
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, video);
-		
+
 		// ビュー×プロジェクション座標変換行列
 		let eyePosition = new Array();
 		let camUpDirection = new Array();
@@ -137,7 +137,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		m.lookAt(eyePosition, [0.0, 0.0, 0.0], camUpDirection, vMatrix);
 		m.perspective(45, canvas.width / canvas.height, 0.1, 10.0, pMatrix);
 		m.multiply(pMatrix, vMatrix, tmpMatrix);
-		
+
 		/* 球体レンダリング */
 		set_attribute(  [spher.getVboHdl(eBufType.pos)  , spher.getVboHdl(eBufType.col)  , spher.getVboHdl(eBufType.uv)], 
 						[spher.getAttrHdl(eBufType.pos) , spher.getAttrHdl(eBufType.col) , spher.getAttrHdl(eBufType.uv)],
@@ -150,7 +150,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
 		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, spher.getIboLen(), gl.UNSIGNED_SHORT, 0);
-		
+
 		/* cubeレンダリング */
 		set_attribute(	[cube.getVboHdl(eBufType.pos)  , cube.getVboHdl(eBufType.col)  , cube.getVboHdl(eBufType.uv)], 
 						[cube.getAttrHdl(eBufType.pos) , cube.getAttrHdl(eBufType.col) , cube.getAttrHdl(eBufType.uv)],
@@ -179,7 +179,7 @@ canvas.addEventListener('mousemove', mouseMove, true);
 
 		// コンテキストの再描画
 		gl.flush();
-		
+
 		// ループのために再帰呼び出し
 		requestAnimationFrame(arguments.callee);
 	})();
