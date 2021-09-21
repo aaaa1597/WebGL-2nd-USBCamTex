@@ -9,13 +9,6 @@ function webgl_onload() {
 		canvas.height= 720;
 	let video;
 
-	/* マウスイベント設定 */
-	canvas.addEventListener('mousemove', mouseMove, true);
-
-let q = new mat.Vector4();
-let qt = q.identity(q.create());
-
-
 	/* カメラ初期化 */
 	if(!navigator.getUserMedia) {
 		/* ブラウザ未サポート */
@@ -66,36 +59,38 @@ function startWebGL(){
 							{'size': 3, 'hBuf' : gl.getAttribLocation(program, 'aColor'),   },
 							{'size': 2, 'hBuf' : gl.getAttribLocation(program, 'aTexCoord'),},];
 
+	/*----------- モデル定義 -----------*/
 	/* 平面 */
-	let planeModel_glInfo = function() {
-					let ModelData = createPlane(3);
-					function createPlane(size){
-						let vertex = [
-							-size, -size, 0,   size, -size, 0,   size, size, 0,  -size,  size, 0,
-						];
-						let nor = [
-							1.0, 1.0,  1.0,  1.0, 1.0,  1.0,  1.0,  1.0,  1.0, 1.0,  1.0,  1.0,
-						];
-						let col = new Array();
-						col.push(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, );
+	let planeModel_glInfo =
+		function() {
+			let ModelData = createPlane(3);
+			function createPlane(size){
+				let vertex = [
+					-size, -size, 0,   size, -size, 0,   size, size, 0,  -size,  size, 0,
+				];
+				let nor = [
+					1.0, 1.0,  1.0,  1.0, 1.0,  1.0,  1.0,  1.0,  1.0, 1.0,  1.0,  1.0,
+				];
+				let col = new Array();
+				col.push(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, );
 
-						let uv = [
-							0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
-						];
-						let idx = [
-							 0,  1,  2,  0,  2,  3,
-						];
-						return {p : vertex, n : nor, c : col, t : uv, i : idx};
-					}
-					let hPosition  = create_vbo(ModelData.p);
-					let hColor     = create_vbo(ModelData.c);
-					let hTexCoord  = create_vbo(ModelData.t);
-					let hIndex     = create_ibo(ModelData.i);
-    				return	{'vbos':{'pos': {'vbo_hdl' : hPosition, 'size': attPos3Col3Tex2[0].size, 'atr_hdl': attPos3Col3Tex2[0].hBuf},
-									 'col': {'vbo_hdl' : hColor   , 'size': attPos3Col3Tex2[1].size, 'atr_hdl': attPos3Col3Tex2[1].hBuf},
-									 'uv' : {'vbo_hdl' : hTexCoord, 'size': attPos3Col3Tex2[2].size, 'atr_hdl': attPos3Col3Tex2[2].hBuf},},
-							'ibo' : {'ibo_hdl': hIndex, 'idxlen': ModelData.i.length,},};
-				}();
+				let uv = [
+					0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+				];
+				let idx = [
+					 0,  1,  2,  0,  2,  3,
+				];
+				return {p : vertex, n : nor, c : col, t : uv, i : idx};
+			}
+			let hPosition  = create_vbo(ModelData.p);
+			let hColor     = create_vbo(ModelData.c);
+			let hTexCoord  = create_vbo(ModelData.t);
+			let hIndex     = create_ibo(ModelData.i);
+			return	{'vbos':{'pos': {'vbo_hdl' : hPosition, 'size': attPos3Col3Tex2[0].size, 'atr_hdl': attPos3Col3Tex2[0].hBuf},
+							 'col': {'vbo_hdl' : hColor   , 'size': attPos3Col3Tex2[1].size, 'atr_hdl': attPos3Col3Tex2[1].hBuf},
+							 'uv' : {'vbo_hdl' : hTexCoord, 'size': attPos3Col3Tex2[2].size, 'atr_hdl': attPos3Col3Tex2[2].hBuf},},
+					'ibo' : {'ibo_hdl': hIndex, 'idxlen': ModelData.i.length,},};
+		}();
 
 	// attributeLocationを配列に取得
 	let attLocation = new Array();
@@ -125,13 +120,14 @@ function startWebGL(){
 	let sVBOList   = [sPosition, sColor, sTexCoord];
 	let sIndex     = create_ibo(sphereData.i);
 	
+	/*----------- 空間定義 -----------*/
 	// uniformLocationを配列に取得
 	let uniLocation = new Array();
 	uniLocation[0] = gl.getUniformLocation(program, 'uMvpMatrix');
 	uniLocation[1] = gl.getUniformLocation(program, 'uTexture');
 	
 	// 各種行列の生成と初期化
-	let m = new mat.Matrix44();
+	let m = mat.Matrix44;
 	let mMatrix   = m.identity(m.create());
 	let vMatrix   = m.identity(m.create());
 	let pMatrix   = m.identity(m.create());
@@ -159,6 +155,14 @@ function startWebGL(){
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 	
+
+
+let q = mat.Vector4;
+let qt = q.identity(q.create());
+
+/* マウスイベント設定 */
+canvas.addEventListener('mousemove', mouseMove, true);
+
 	// 恒常ループ
 	(function(){
 		// カウンタをインクリメントする
@@ -311,8 +315,6 @@ function startWebGL(){
 		return ibo;
 	}
 	
-}
-
 	// マウスムーブイベントに登録する処理
 	function mouseMove(e){
 		let cw = canvas.width;
@@ -327,6 +329,7 @@ function startWebGL(){
 			x *= sq;
 			y *= sq;
 		}
-		q.rotate(r, [y, x, 0.0], qt);
+		mat.Vector4.rotate(r, [y, x, 0.0], qt);
 	}
+}
 }
