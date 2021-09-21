@@ -85,12 +85,12 @@ function startWebGL(){
 	let unifHdlMvpMatrix= gl.getUniformLocation(program, 'uMvpMatrix');
 	/* 各行列生成/初期化 */
 	let m = mat.Matrix44;
-	let mMatrix   = m.loadIdentity(m.create());
-	let vMatrix   = m.loadIdentity(m.create());
-	let pMatrix   = m.loadIdentity(m.create());
-	let tmpMatrix = m.loadIdentity(m.create());
-	let mvpMatrix = m.loadIdentity(m.create());
-	let invMatrix = m.loadIdentity(m.create());
+	let mMatrix   = m.createIdentity();
+	let vMatrix   = m.createIdentity();
+	let pMatrix   = m.createIdentity();
+	let tmpMatrix = m.createIdentity();
+	let mvpMatrix = m.createIdentity();
+	let invMatrix = m.createIdentity();
 	
 	// カウンタ初期化
 	let count = 0;
