@@ -87,37 +87,31 @@ mat.Matrix44.rotate = function(mat, angle, axis, retm){
 	if(!power){return null;}
 	let xx = axis[0], yy = axis[1], zz = axis[2];
 	if(power != 1){power = 1 / power; xx *= power; yy *= power; zz *= power;}
-	let sa = Math.sin(angle), ca = Math.cos(angle), f = 1 - ca,
-		g = mat[0],  h = mat[1], i = mat[2],  j = mat[3],
+	let sa = Math.sin(angle);
+	let ca = Math.cos(angle);
+	let g = mat[0],  h = mat[1], i = mat[2],  j = mat[3],
 		k = mat[4],  l = mat[5], m = mat[6],  n = mat[7],
 		o = mat[8],  p = mat[9], q = mat[10], r = mat[11],
-		s = xx * xx * f + ca,
-		t = yy * xx * f + zz * sa,
-		u = zz * xx * f - yy * sa,
-		v = xx * yy * f - zz * sa,
-		w = yy * yy * f + ca,
-		x = zz * yy * f + xx * sa,
-		y = xx * zz * f + yy * sa,
-		z = yy * zz * f - xx * sa,
-		A = zz * zz * f + ca;
-	if(angle){
-		if(mat != retm){
-			retm[12] = mat[12]; retm[13] = mat[13];
-			retm[14] = mat[14]; retm[15] = mat[15];
-		}
-	} else {
-		retm = mat;
-	}
-	retm[0]  = g * s + k * t + o * u;
-	retm[1]  = h * s + l * t + p * u;
-	retm[2]  = i * s + m * t + q * u;
-	retm[3]  = j * s + n * t + r * u;
-	retm[4]  = g * v + k * w + o * x;
-	retm[5]  = h * v + l * w + p * x;
-	retm[6]  = i * v + m * w + q * x;
-	retm[7]  = j * v + n * w + r * x;
-	retm[8]  = g * y + k * z + o * A;
-	retm[9]  = h * y + l * z + p * A;
+		s = xx * xx * (1 - ca) + ca,
+		t = yy * xx * (1 - ca) + zz * sa,
+		u = zz * xx * (1 - ca) - yy * sa,
+		v = xx * yy * (1 - ca) - zz * sa,
+		w = yy * yy * (1 - ca) + ca,
+		x = zz * yy * (1 - ca) + xx * sa,
+		y = xx * zz * (1 - ca) + yy * sa,
+		z = yy * zz * (1 - ca) - xx * sa,
+		A = zz * zz * (1 - ca) + ca;
+	retm = mat;
+	retm[ 0]  = g * s + k * t + o * u;
+	retm[ 1]  = h * s + l * t + p * u;
+	retm[ 2]  = i * s + m * t + q * u;
+	retm[ 3]  = j * s + n * t + r * u;
+	retm[ 4]  = g * v + k * w + o * x;
+	retm[ 5]  = h * v + l * w + p * x;
+	retm[ 6]  = i * v + m * w + q * x;
+	retm[ 7]  = j * v + n * w + r * x;
+	retm[ 8]  = g * y + k * z + o * A;
+	retm[ 9]  = h * y + l * z + p * A;
 	retm[10] = i * y + m * z + q * A;
 	retm[11] = j * y + n * z + r * A;
 	return retm;
@@ -340,18 +334,13 @@ mat.Vector4.rotate = function(angle, axis, retvec){
 }
 
 mat.Vector4.toVec3 = function(lvec, rvec, retvec){
-	let qp = this.create();
-	let qq = this.create();
-	let qr = this.create();
-	mat.Vector4.inverse(rvec, qr);
-	qp[0] = lvec[0];
-	qp[1] = lvec[1];
-	qp[2] = lvec[2];
-	mat.Vector4.multiply(qr, qp, qq);
-	mat.Vector4.multiply(qq, rvec, qr);
-	retvec[0] = qr[0];
-	retvec[1] = qr[1];
-	retvec[2] = qr[2];
+	let lvec2    = [lvec[0],lvec[1],lvec[2],0];
+	let inv_rvec = mat.Vector4.inverse(rvec, []);
+	let inv_mvec = mat.Vector4.multiply(inv_rvec, lvec2, []);
+	let mvec     = mat.Vector4.multiply(inv_mvec, rvec, []);
+	retvec[0] = mvec[0];
+	retvec[1] = mvec[1];
+	retvec[2] = mvec[2];
 	return retvec;
 }
 

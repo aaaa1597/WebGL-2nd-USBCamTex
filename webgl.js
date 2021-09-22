@@ -7,15 +7,21 @@ const aPosition	= 'aPosition';
 const aColor	= 'aColor';
 const aTexCoord = 'aTexCoord';
 
+const CAVVAS_WIDTH  = 1280;
+const CAVVAS_HEIGHT = 720;
+
 /* 相対位置座標 */
-const relPos = {tlans:[0,0,0,],rot:[0,0,0,],scale:[0,0,0,],isDgagging:false,}
+const relPos = {tlans:[0,0,0,],rot:[0,0,0,],scale:[1.0,1.0,1.0,],isDgagging:false,
+	vMatrix:mat.Matrix44.lookAt([0.0, 0.0, 7.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0], []),
+	pMatrix:mat.Matrix44.perspective(45, CAVVAS_WIDTH / CAVVAS_HEIGHT, 0.1, 10.0, []),
+}
 
 /* エントリポイント */
 function webgl_onload() {
 	/* canvasエレメント初期化 */
 	let canvas = document.getElementById('canvas');
-		canvas.width = 1280;
-		canvas.height= 720;
+		canvas.width = CAVVAS_WIDTH;
+		canvas.height= CAVVAS_HEIGHT;
 	let video;
 
 	/* カメラ初期化 */
@@ -181,10 +187,10 @@ function startWebGL(){
 		/* 色   */bindVbo2Att(gl, plane.getVboHdl(eBufType.col), plane.getAttrHdl(eBufType.col), plane.getAttrSize(eBufType.col));
 		/* Tex  */bindVbo2Att(gl, plane.getVboHdl(eBufType.uv) , plane.getAttrHdl(eBufType.uv) , plane.getAttrSize(eBufType.uv));
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.getIboHdl());
-		m.loadIdentity(mMatrix);
-		m.translate(mMatrix, [2.0, 1.0, 1.0], mMatrix);
-		m.multiply(vpMatrix, mMatrix, mvpMatrix);
-		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
+
+		let plane_vpMatrix = m.multiply(relPos.pMatrix, relPos.vMatrix, []);
+		let plane_mvpMatrix = m.multiply(plane_vpMatrix, plane.getModelMatrix(), []);
+		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, plane_mvpMatrix);
 		gl.uniform1i(unifHdlTexture, 0);
 		gl.drawElements(gl.TRIANGLES, plane.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
