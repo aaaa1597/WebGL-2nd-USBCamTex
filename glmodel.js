@@ -13,6 +13,8 @@ class GlModelBase {
 	getAttrSize(type) { }
 	getIboHdl() { }
 	getIboLen() { }
+	getModelMatrix() { }
+	setModelMatrix() { }
 }
 
 /* 板ポリ */
@@ -48,6 +50,7 @@ class GLPlaneMolde extends mixin(GlModelBase) {
 		this._aUvHdl  = gl.getAttribLocation(program, aTexCoord);
 		this._iIdxHdl = createIbo(gl, ModelData.i);
 		this._iIdxlen = ModelData.i.length;
+		this._mMatrix = mat.Matrix44.createIdentity();
 	}
 
 	getVboHdl(type) {
@@ -85,6 +88,14 @@ class GLPlaneMolde extends mixin(GlModelBase) {
 	
 	getIboLen() {
 		return this._iIdxlen;
+	}
+
+	getModelMatrix() {
+		return this._mMatrix;
+	}
+
+	setModelMatrix(mat) {
+		this._mMatrix = mat;
 	}
 }
 
@@ -147,6 +158,7 @@ class GLCubeMolde extends mixin(GlModelBase) {
 		this._aUvHdl  = gl.getAttribLocation(program, aTexCoord);
 		this._iIdxHdl = createIbo(gl, ModelData.i);
 		this._iIdxlen = ModelData.i.length;
+		this._mMatrix = mat.Matrix44.createIdentity();
 	}
 
 	getVboHdl(type) {
@@ -184,6 +196,14 @@ class GLCubeMolde extends mixin(GlModelBase) {
 	
 	getIboLen() {
 		return this._iIdxlen;
+	}
+
+	getModelMatrix() {
+		return this._mMatrix;
+	}
+
+	setModelMatrix(mat) {
+		this._mMatrix = mat;
 	}
 }
 
@@ -237,6 +257,7 @@ class GLSphereMolde extends mixin(GlModelBase) {
 		this._aUvHdl  = gl.getAttribLocation(program, aTexCoord);
 		this._iIdxHdl = createIbo(gl, ModelData.i);
 		this._iIdxlen = ModelData.i.length;
+		this._mMatrix = mat.Matrix44.createIdentity();
 	}
 
 	getVboHdl(type) {
@@ -274,5 +295,13 @@ class GLSphereMolde extends mixin(GlModelBase) {
 	
 	getIboLen() {
 		return this._iIdxlen;
+	}
+
+	getModelMatrix() {
+		return this._mMatrix;
+	}
+
+	setModelMatrix(mat) {
+		this._mMatrix = mat;
 	}
 }

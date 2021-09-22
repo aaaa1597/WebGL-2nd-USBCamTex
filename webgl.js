@@ -8,7 +8,7 @@ const aColor	= 'aColor';
 const aTexCoord = 'aTexCoord';
 
 /* 相対位置座標 */
-const relPos = {tlansx:0,tlansy:0,tlansz:0,rotz:0,roty:0,rotz:0,scalex:0,scaley:0,scalez:0,isDgagging:false,}
+const relPos = {tlans:[0,0,0,],rot:[0,0,0,],scale:[0,0,0,],isDgagging:false,}
 
 /* エントリポイント */
 function webgl_onload() {
@@ -119,9 +119,11 @@ function startWebGL(){
 	let vecMouseAngle = v.LoadIdentity(v.create());
 
 	/* マウスイベント設定 */
+	canvas.addEventListener('mousemove', mouseMove_org, true);
 	canvas.addEventListener('mousemove', mouseMove, true);
 	canvas.addEventListener('mousedown' , function(e) { relPos.isDgagging=true; });
 	canvas.addEventListener('mouseup'   , function(e) { relPos.isDgagging=false;});
+	canvas.addEventListener('mousewheel', mouseWheel, {passive: true});
 
 	// 恒常ループ
 	(function(){
@@ -193,10 +195,19 @@ function startWebGL(){
 		requestAnimationFrame(arguments.callee);
 	})();
 
-	/* マウス移動イベント */
+	/* マウスイベント(ホイール回転)) */
+	function mouseWheel(e){
+		console.log("mousewheel:" + e.wheelDelta);
+	}
+
+	/* マウスイベント(移動) */
 	function mouseMove(e){
 		if(relPos.isDgagging==false) return;
+		console.log('e.clientX=', e.clientX, ' e.clientY=', e.clientY);
+	}
 
+	/* マウス移動イベント */
+	function mouseMove_org(e){
 		let cw = canvas.width;
 		let ch = canvas.height;
 		let wh = 1 / Math.sqrt(cw * cw + ch * ch);
