@@ -31,7 +31,7 @@ function webgl_onload() {
 	}
 	else {
 		navigator.getUserMedia(
-			{video: true, audio: false},
+			{video: {width: 1280, height: 720,}, audio: false},
 			/* 成功応答 */
 			function(mediaStream){
 				/* カメラ画像表示 */
@@ -40,6 +40,7 @@ function webgl_onload() {
 				video.addEventListener('canplay', function(){
 					video.removeEventListener('canplay', arguments.callee, true);	/* 多重登録防止 */
 					video.play();													/* stream開始 */
+					console.log('src.size(', video.videoWidth, ',', video.videoHeight, ') <video>.size(', video.clientWidth, ',', video.clientHeight, ')');
 					startWebGL();													/* WebGL開始 */
 				}, true);
 				

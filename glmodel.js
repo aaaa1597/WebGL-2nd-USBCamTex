@@ -25,7 +25,7 @@ class GLPlaneMolde extends mixin(GlModelBase) {
 		let ModelData = createPlane(3);
 		function createPlane(size){
 			let vertex = [
-				-size*1.28*(1/0.78), -size*0.78*(1/0.78), 0,   size*1.28*(1/0.78), -size*0.78*(1/0.78), 0,   size*1.28*(1/0.78), size*0.78*(1/0.78), 0,  -size*1.28*(1/0.78),  size*0.78*(1/0.78), 0,
+				-size*(16/9), -size, 0,   size*(16/9), -size, 0,   size*(16/9), size, 0,  -size*(16/9),  size, 0,
 			];
 			let nor = [
 				1.0, 1.0,  1.0,  1.0, 1.0,  1.0,  1.0,  1.0,  1.0, 1.0,  1.0,  1.0,
