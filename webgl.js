@@ -129,6 +129,8 @@ function webgl_onload() {
 		canvas.addEventListener('mousemove', mouseMove_org, true);
 		canvas.addEventListener('mousemove', mouseMove, true);
 		canvas.addEventListener('mousewheel', mouseWheel, {passive: true});
+		document.getElementById("depress").addEventListener('focus', (e)=>{ e.target.setAttribute("data-insert-before", e.target.value);},true);
+		document.getElementById("depress").addEventListener('change', changeDepress, true);
 
 		// 恒常ループ
 		(function drawScene(now){
@@ -211,6 +213,18 @@ function webgl_onload() {
 
 			let new_mMatrix = m.translate(plane.getModelMatrix(), [(e.movementX/100), -(e.movementY/100), 0], []);
 			plane.setModelMatrix(new_mMatrix);
+		}
+
+		/* 俯角変更 */
+		function changeDepress(e){
+			let depctl = document.getElementById("depress");
+			let preval = depctl.getAttribute("data-insert-before")
+			let depress= depctl.value;
+			console.log("depress_value=", depress);
+			let rad  = (preval-depress) * Math.PI / 180;
+			let new_mMatrix = m.rotate(plane.getModelMatrix(), rad, [1.0, 0.0, 0.0], []);
+			plane.setModelMatrix(new_mMatrix);
+			depctl.setAttribute("data-insert-before",depress);
 		}
 
 		/* マウス移動イベント */

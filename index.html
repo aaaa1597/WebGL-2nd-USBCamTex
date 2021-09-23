@@ -38,11 +38,14 @@
 		canvas {
 			background-color: black;
 		}
+		input[type="range"] {
+			-webkit-appearance: slider-vertical;
+		}
 		</style>
 	</head>
 
 	<body>
-		<div><canvas id="canvas"></canvas></div>
-		<input type="range" name="speed" min="0" max="100">
+		<div style="float: left"><canvas id="canvas"></canvas></div>
+		<div style="float: right"><input id="depress" type="range" name="speed" min="0" max="89"  value="0" orient="vertical"></div>
 	</body>
 </html>
