@@ -21,7 +21,7 @@ function webgl_onload() {
 	let video;
 
 	/* 空間座標のView/プロジェクション行列を保持 */
-	relPos.pMatrix = mat.Matrix44.perspective(45, canvas.width / canvas.height, 0.1, 10.0, []);
+	relPos.pMatrix = mat.Matrix44.perspective(45, canvas.width / canvas.height, 0.1, 1000.0, []);
 	relPos.vpMatrix= mat.Matrix44.multiply(relPos.pMatrix, relPos.vMatrix, []);
 
 	/* カメラ初期化 */
@@ -210,7 +210,6 @@ function webgl_onload() {
 		/* マウスイベント(移動) */
 		function mouseMove(e){
 			if(event.which != 1/* left */) return;
-
 			let new_mMatrix = m.translate(plane.getModelMatrix(), [(e.movementX/100), -(e.movementY/100), 0], []);
 			plane.setModelMatrix(new_mMatrix);
 		}
@@ -220,10 +219,13 @@ function webgl_onload() {
 			let depctl = document.getElementById("depress");
 			let preval = depctl.getAttribute("data-insert-before")
 			let depress= depctl.value;
-			console.log("depress_value=", depress);
+
 			let rad  = (preval-depress) * Math.PI / 180;
-			let new_mMatrix = m.rotate(plane.getModelMatrix(), rad, [1.0, 0.0, 0.0], []);
+			let offsetMatrix= m.translate(plane.getModelMatrix(), [0, -3, 0], []);
+			let depMatrix   = m.rotate(offsetMatrix, rad, [1.0, 0.0, 0.0], []);
+			let new_mMatrix = m.translate(depMatrix, [0, 3, 0], []);
 			plane.setModelMatrix(new_mMatrix);
+
 			depctl.setAttribute("data-insert-before",depress);
 		}
 
