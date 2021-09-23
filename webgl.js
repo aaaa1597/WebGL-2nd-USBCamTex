@@ -103,7 +103,7 @@ function webgl_onload() {
 		let vpMatrix = m.createIdentity();
 		let mvpMatrix = m.createIdentity();
 		let invMatrix = m.createIdentity();
-		
+
 		/*----------- テクスチャ定義 -----------*/
 		enableTexture(gl, video);
 		function enableTexture(gl, video) {
@@ -117,7 +117,7 @@ function webgl_onload() {
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		};
-		
+
 		/* 定期カウンタ初期化 */
 		let count = 0;
 
@@ -201,7 +201,8 @@ function webgl_onload() {
 
 		/* マウスイベント(ホイール回転)) */
 		function mouseWheel(e){
-			console.log("mousewheel:" + e.wheelDelta);
+			let new_mMatrix = m.scale(plane.getModelMatrix(), [1+(e.wheelDelta/150/10), 1+(e.wheelDelta/150/10), 1+(e.wheelDelta/150/10)], []);
+			plane.setModelMatrix(new_mMatrix);
 		}
 
 		/* マウスイベント(移動) */
