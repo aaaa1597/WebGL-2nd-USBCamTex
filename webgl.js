@@ -131,7 +131,7 @@ function startWebGL(){
 	canvas.addEventListener('mousewheel', mouseWheel, {passive: true});
 
 	// 恒常ループ
-	(function(){
+	(function drawScene(now){
 		/* 定期カウンタインクリメント */
 		count++;
 
@@ -196,7 +196,7 @@ function startWebGL(){
 		gl.flush();
 
 		/* ループのために再帰呼び出し */
-		requestAnimationFrame(arguments.callee);
+		requestAnimationFrame(drawScene);
 	})();
 
 	/* マウスイベント(ホイール回転)) */
