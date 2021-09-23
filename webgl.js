@@ -8,7 +8,7 @@ const aColor	= 'aColor';
 const aTexCoord = 'aTexCoord';
 
 /* 相対位置座標 */
-const relPos = {tlans:[0,0,0,],rot:[0,0,0,],scale:[1.0,1.0,1.0,],isDgagging:false,
+const relPos = {rot:[0,0,0,],scale:[1.0,1.0,1.0,],
 	vMatrix:mat.Matrix44.lookAt([0.0, 0.0, 7.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0], []),
 }
 
@@ -128,8 +128,6 @@ function startWebGL(){
 	/* マウスイベント設定 */
 	canvas.addEventListener('mousemove', mouseMove_org, true);
 	canvas.addEventListener('mousemove', mouseMove, true);
-	canvas.addEventListener('mousedown' , function(e) { relPos.isDgagging=true; });
-	canvas.addEventListener('mouseup'   , function(e) { relPos.isDgagging=false;});
 	canvas.addEventListener('mousewheel', mouseWheel, {passive: true});
 
 	// 恒常ループ
@@ -208,8 +206,10 @@ function startWebGL(){
 
 	/* マウスイベント(移動) */
 	function mouseMove(e){
-		if(relPos.isDgagging==false) return;
-		console.log('e.clientX=', e.clientX, ' e.clientY=', e.clientY);
+		if(event.which != 1/* left */) return;
+
+		let new_mMatrix = m.translate(plane.getModelMatrix(), [(e.movementX/100), -(e.movementY/100), 0], []);
+		plane.setModelMatrix(new_mMatrix);
 	}
 
 	/* マウス移動イベント */
