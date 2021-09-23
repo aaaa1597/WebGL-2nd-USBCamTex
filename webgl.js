@@ -257,14 +257,10 @@ function bindVbo2Att(gl, vbohdl, atthdl, attdim){
 
 /* シェーダ生成 */
 function loadShader(gl, shadertype, srcstr) {
-	/* シェーダ生成 */
-	let shdr = gl.createShader(shadertype);
-	/* シェーダソースを送る */
-	gl.shaderSource( shdr, srcstr );
-	/* コンパイル */
-	gl.compileShader(shdr);
-	/* コンパイル結果判定 */
-	if( !gl.getShaderParameter( shdr, gl.COMPILE_STATUS) ) {
+	let shdr = gl.createShader(shadertype);					/* シェーダ生成 */
+	gl.shaderSource( shdr, srcstr );						/* シェーダソースを送る */
+	gl.compileShader(shdr);									/* コンパイル */
+	if( !gl.getShaderParameter( shdr, gl.COMPILE_STATUS) ) {/* コンパイル結果判定 */
 		let str = gl.getShaderInfoLog( shdr );
 		throw new Error("unable to create shader shader type = " + shadertype + " : " + str);
 	}
