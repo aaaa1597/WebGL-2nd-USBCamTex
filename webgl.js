@@ -7,7 +7,7 @@ const aPosition	= 'aPosition';
 const aColor	= 'aColor';
 const aTexCoord = 'aTexCoord';
 
-/* 相対位置座標 */
+/* 空間座標 */
 const relPos = {rot:[0,0,0,],scale:[1.0,1.0,1.0,],
 	vMatrix:mat.Matrix44.lookAt([0.0, 0.0, 7.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0], []),
 }
@@ -20,9 +20,9 @@ function webgl_onload() {
 		canvas.height= 720;
 	let video;
 
-	/* 相対位置座標のView/プロジェクション行列を保持 */
+	/* 空間座標のView/プロジェクション行列を保持 */
 	relPos.pMatrix = mat.Matrix44.perspective(45, canvas.width / canvas.height, 0.1, 10.0, []);
-	relPos.vpMatrix = mat.Matrix44.multiply(relPos.pMatrix, relPos.vMatrix, []);
+	relPos.vpMatrix= mat.Matrix44.multiply(relPos.pMatrix, relPos.vMatrix, []);
 
 	/* カメラ初期化 */
 	if(!navigator.getUserMedia) {
@@ -58,177 +58,177 @@ function webgl_onload() {
 		);
 	}
 
-/* WebGL */
-function startWebGL(){
-	/* webglコンテキスト取得 */
-	let gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+	/* WebGL */
+	function startWebGL(){
+		/* webglコンテキスト取得 */
+		let gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
-	/*----------- GL初期化 -----------*/
-	/* 深度テスト有効 */
-	gl.enable(gl.DEPTH_TEST);
-	gl.depthFunc(gl.LEQUAL);
-	/* クリア色設定 */
-	gl.clearColor(0.0, 0.7, 0.7, 1.0);
-	/* カリングを有効 */
-	gl.enable(gl.CULL_FACE);
-	/* 頂点シェーダ生成 */
-	let vshader = loadShader(gl, gl.VERTEX_SHADER  , document.getElementById('vsh').text);
-	/* フラグメントシェーダ生成 */
-	let fshader = loadShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fsh').text);
-	/* プログラム生成 */
-	let program = createProgram(gl, vshader, fshader);
+		/*----------- GL初期化 -----------*/
+		/* 深度テスト有効 */
+		gl.enable(gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
+		/* クリア色設定 */
+		gl.clearColor(0.0, 0.7, 0.7, 1.0);
+		/* カリングを有効 */
+		gl.enable(gl.CULL_FACE);
+		/* 頂点シェーダ生成 */
+		let vshader = loadShader(gl, gl.VERTEX_SHADER  , document.getElementById('vsh').text);
+		/* フラグメントシェーダ生成 */
+		let fshader = loadShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fsh').text);
+		/* プログラム生成 */
+		let program = createProgram(gl, vshader, fshader);
 
-	/*----------- モデル定義 -----------*/
-	/* 平面 */
-	let plane = new GLPlaneMolde(gl, program);
+		/*----------- モデル定義 -----------*/
+		/* 平面 */
+		let plane = new GLPlaneMolde(gl, program);
 
-	/* cubeモデル */
-	let cube = new GLCubeMolde(gl, program);
-	
-	/* 球体モデル */
-	let spher = new GLSphereMolde(gl, program);
-	
-	/*----------- テクスチャ定義 -----------*/
-	/* シェーダのTextureハンドラを取得 */
-	let unifHdlTexture  = gl.getUniformLocation(program, 'uTexture');
+		/* cubeモデル */
+		let cube = new GLCubeMolde(gl, program);
+		
+		/* 球体モデル */
+		let spher = new GLSphereMolde(gl, program);
+		
+		/*----------- テクスチャ定義 -----------*/
+		/* シェーダのTextureハンドラを取得 */
+		let unifHdlTexture  = gl.getUniformLocation(program, 'uTexture');
 
-	/*----------- 空間定義 -----------*/
-	/* シェーダのMvp行列ハンドラを取得 */
-	let unifHdlMvpMatrix= gl.getUniformLocation(program, 'uMvpMatrix');
-	/* 各行列生成/初期化 */
-	let m = mat.Matrix44;
-	let mMatrix   = m.createIdentity();
-	let vMatrix   = m.createIdentity();
-	let pMatrix   = m.createIdentity();
-	let vpMatrix = m.createIdentity();
-	let mvpMatrix = m.createIdentity();
-	let invMatrix = m.createIdentity();
-	
-	/*----------- テクスチャ定義 -----------*/
-	enableTexture(gl, video);
-	function enableTexture(gl, video) {
-		let videoTexture = gl.createTexture(gl.TEXTURE_2D);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, videoTexture);
-//		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, video);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	};
-	
-	/* 定期カウンタ初期化 */
-	let count = 0;
+		/*----------- 空間定義 -----------*/
+		/* シェーダのMvp行列ハンドラを取得 */
+		let unifHdlMvpMatrix= gl.getUniformLocation(program, 'uMvpMatrix');
+		/* 各行列生成/初期化 */
+		let m = mat.Matrix44;
+		let mMatrix   = m.createIdentity();
+		let vMatrix   = m.createIdentity();
+		let pMatrix   = m.createIdentity();
+		let vpMatrix = m.createIdentity();
+		let mvpMatrix = m.createIdentity();
+		let invMatrix = m.createIdentity();
+		
+		/*----------- テクスチャ定義 -----------*/
+		enableTexture(gl, video);
+		function enableTexture(gl, video) {
+			let videoTexture = gl.createTexture(gl.TEXTURE_2D);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D, videoTexture);
+	//		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, video);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		};
+		
+		/* 定期カウンタ初期化 */
+		let count = 0;
 
-	/*----------- ジェスチャ操作保持 -----------*/
-	let v = mat.Vector4;
-	let vecMouseAngle = v.LoadIdentity(v.create());
+		/*----------- ジェスチャ操作保持 -----------*/
+		let v = mat.Vector4;
+		let vecMouseAngle = v.LoadIdentity(v.create());
 
-	/* マウスイベント設定 */
-	canvas.addEventListener('mousemove', mouseMove_org, true);
-	canvas.addEventListener('mousemove', mouseMove, true);
-	canvas.addEventListener('mousewheel', mouseWheel, {passive: true});
+		/* マウスイベント設定 */
+		canvas.addEventListener('mousemove', mouseMove_org, true);
+		canvas.addEventListener('mousemove', mouseMove, true);
+		canvas.addEventListener('mousewheel', mouseWheel, {passive: true});
 
-	// 恒常ループ
-	(function drawScene(now){
-		/* 定期カウンタインクリメント */
-		count++;
+		// 恒常ループ
+		(function drawScene(now){
+			/* 定期カウンタインクリメント */
+			count++;
 
-		/* 角度算出(カウンタを元にラジアン[rad]を求める) */
-		let rad  = (count % 360) * Math.PI / 180;
+			/* 角度算出(カウンタを元にラジアン[rad]を求める) */
+			let rad  = (count % 360) * Math.PI / 180;
 
-		/* canvas初期化 */
-		gl.clearDepth(1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			/* canvas初期化 */
+			gl.clearDepth(1.0);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		/* テクスチャ更新 */
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+			/* テクスチャ更新 */
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
 
-		/* ビュー×プロジェクション座標変換行列 */
-		let eyePosition   = [];
-		let camUpDirection= [];
-		v.toVec3([0.0, 0.0, 7.0], vecMouseAngle, eyePosition);
-		v.toVec3([0.0, 1.0, 0.0], vecMouseAngle, camUpDirection);
-		m.lookAt(eyePosition, [0.0, 0.0, 0.0], camUpDirection, vMatrix);
-		m.perspective(45, canvas.width / canvas.height, 0.1, 10.0, pMatrix);
-		m.multiply(pMatrix, vMatrix, vpMatrix);
+			/* ビュー×プロジェクション座標変換行列 */
+			let eyePosition   = [];
+			let camUpDirection= [];
+			v.toVec3([0.0, 0.0, 7.0], vecMouseAngle, eyePosition);
+			v.toVec3([0.0, 1.0, 0.0], vecMouseAngle, camUpDirection);
+			m.lookAt(eyePosition, [0.0, 0.0, 0.0], camUpDirection, vMatrix);
+			m.perspective(45, canvas.width / canvas.height, 0.1, 10.0, pMatrix);
+			m.multiply(pMatrix, vMatrix, vpMatrix);
 
-		/* 球体レンダリング */
-		/* 頂点 */bindVbo2Att(gl, spher.getVboHdl(eBufType.pos), spher.getAttrHdl(eBufType.pos), spher.getAttrSize(eBufType.pos));
-		/* 色   */bindVbo2Att(gl, spher.getVboHdl(eBufType.col), spher.getAttrHdl(eBufType.col), spher.getAttrSize(eBufType.col));
-		/* Tex  */bindVbo2Att(gl, spher.getVboHdl(eBufType.uv) , spher.getAttrHdl(eBufType.uv) , spher.getAttrSize(eBufType.uv));
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, spher.getIboHdl());
-		m.loadIdentity(mMatrix);
-		m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
-		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
-		m.multiply(vpMatrix, mMatrix, mvpMatrix);
-		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
-		gl.uniform1i(unifHdlTexture, 0);
-		gl.drawElements(gl.TRIANGLES, spher.getIboLen(), gl.UNSIGNED_SHORT, 0);
+			/* 球体レンダリング */
+			/* 頂点 */bindVbo2Att(gl, spher.getVboHdl(eBufType.pos), spher.getAttrHdl(eBufType.pos), spher.getAttrSize(eBufType.pos));
+			/* 色   */bindVbo2Att(gl, spher.getVboHdl(eBufType.col), spher.getAttrHdl(eBufType.col), spher.getAttrSize(eBufType.col));
+			/* Tex  */bindVbo2Att(gl, spher.getVboHdl(eBufType.uv) , spher.getAttrHdl(eBufType.uv) , spher.getAttrSize(eBufType.uv));
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, spher.getIboHdl());
+			m.loadIdentity(mMatrix);
+			m.translate(mMatrix, [1.5, 0.0, 0.0], mMatrix);
+			m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
+			m.multiply(vpMatrix, mMatrix, mvpMatrix);
+			gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
+			gl.uniform1i(unifHdlTexture, 0);
+			gl.drawElements(gl.TRIANGLES, spher.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
-		/* cubeレンダリング */
-		/* 頂点 */bindVbo2Att(gl, cube.getVboHdl(eBufType.pos), cube.getAttrHdl(eBufType.pos), cube.getAttrSize(eBufType.pos));
-		/* 色   */bindVbo2Att(gl, cube.getVboHdl(eBufType.col), cube.getAttrHdl(eBufType.col), cube.getAttrSize(eBufType.col));
-		/* Tex  */bindVbo2Att(gl, cube.getVboHdl(eBufType.uv) , cube.getAttrHdl(eBufType.uv) , cube.getAttrSize(eBufType.uv));
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.getIboHdl());
- 		m.loadIdentity(mMatrix);
-		m.translate(mMatrix, [-1.5, 0.0, 0.0], mMatrix);
-		m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
-		m.rotate(mMatrix, Math.PI, [0.0, 0.0, 1.0], mMatrix);
-		m.multiply(vpMatrix, mMatrix, mvpMatrix);
-		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
-		gl.uniform1i(unifHdlTexture, 0);
-		gl.drawElements(gl.TRIANGLES, cube.getIboLen(), gl.UNSIGNED_SHORT, 0);
+			/* cubeレンダリング */
+			/* 頂点 */bindVbo2Att(gl, cube.getVboHdl(eBufType.pos), cube.getAttrHdl(eBufType.pos), cube.getAttrSize(eBufType.pos));
+			/* 色   */bindVbo2Att(gl, cube.getVboHdl(eBufType.col), cube.getAttrHdl(eBufType.col), cube.getAttrSize(eBufType.col));
+			/* Tex  */bindVbo2Att(gl, cube.getVboHdl(eBufType.uv) , cube.getAttrHdl(eBufType.uv) , cube.getAttrSize(eBufType.uv));
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.getIboHdl());
+	 		m.loadIdentity(mMatrix);
+			m.translate(mMatrix, [-1.5, 0.0, 0.0], mMatrix);
+			m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
+			m.rotate(mMatrix, Math.PI, [0.0, 0.0, 1.0], mMatrix);
+			m.multiply(vpMatrix, mMatrix, mvpMatrix);
+			gl.uniformMatrix4fv(unifHdlMvpMatrix, false, mvpMatrix);
+			gl.uniform1i(unifHdlTexture, 0);
+			gl.drawElements(gl.TRIANGLES, cube.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
-		/* 平面描画 */
-		/* 頂点 */bindVbo2Att(gl, plane.getVboHdl(eBufType.pos), plane.getAttrHdl(eBufType.pos), plane.getAttrSize(eBufType.pos));
-		/* 色   */bindVbo2Att(gl, plane.getVboHdl(eBufType.col), plane.getAttrHdl(eBufType.col), plane.getAttrSize(eBufType.col));
-		/* Tex  */bindVbo2Att(gl, plane.getVboHdl(eBufType.uv) , plane.getAttrHdl(eBufType.uv) , plane.getAttrSize(eBufType.uv));
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.getIboHdl());
+			/* 平面描画 */
+			/* 頂点 */bindVbo2Att(gl, plane.getVboHdl(eBufType.pos), plane.getAttrHdl(eBufType.pos), plane.getAttrSize(eBufType.pos));
+			/* 色   */bindVbo2Att(gl, plane.getVboHdl(eBufType.col), plane.getAttrHdl(eBufType.col), plane.getAttrSize(eBufType.col));
+			/* Tex  */bindVbo2Att(gl, plane.getVboHdl(eBufType.uv) , plane.getAttrHdl(eBufType.uv) , plane.getAttrSize(eBufType.uv));
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.getIboHdl());
 
-		let plane_mvpMatrix = m.multiply(relPos.vpMatrix, plane.getModelMatrix(), []);
-		gl.uniformMatrix4fv(unifHdlMvpMatrix, false, plane_mvpMatrix);
-		gl.uniform1i(unifHdlTexture, 0);
-		gl.drawElements(gl.TRIANGLES, plane.getIboLen(), gl.UNSIGNED_SHORT, 0);
+			let plane_mvpMatrix = m.multiply(relPos.vpMatrix, plane.getModelMatrix(), []);
+			gl.uniformMatrix4fv(unifHdlMvpMatrix, false, plane_mvpMatrix);
+			gl.uniform1i(unifHdlTexture, 0);
+			gl.drawElements(gl.TRIANGLES, plane.getIboLen(), gl.UNSIGNED_SHORT, 0);
 
-		/* コンテキストの再描画 */
-		gl.flush();
+			/* コンテキストの再描画 */
+			gl.flush();
 
-		/* ループのために再帰呼び出し */
-		requestAnimationFrame(drawScene);
-	})();
+			/* ループのために再帰呼び出し */
+			requestAnimationFrame(drawScene);
+		})();
 
-	/* マウスイベント(ホイール回転)) */
-	function mouseWheel(e){
-		console.log("mousewheel:" + e.wheelDelta);
-	}
-
-	/* マウスイベント(移動) */
-	function mouseMove(e){
-		if(event.which != 1/* left */) return;
-
-		let new_mMatrix = m.translate(plane.getModelMatrix(), [(e.movementX/100), -(e.movementY/100), 0], []);
-		plane.setModelMatrix(new_mMatrix);
-	}
-
-	/* マウス移動イベント */
-	function mouseMove_org(e){
-		let cw = canvas.width;
-		let ch = canvas.height;
-		let wh = 1 / Math.sqrt(cw * cw + ch * ch);
-		let x = e.clientX - canvas.offsetLeft - cw * 0.5;
-		let y = e.clientY - canvas.offsetTop - ch * 0.5;
-		let sq = Math.sqrt(x * x + y * y);
-		let r = sq * 2.0 * Math.PI * wh;
-		if(sq != 1){
-			sq = 1 / sq;
-			x *= sq;
-			y *= sq;
+		/* マウスイベント(ホイール回転)) */
+		function mouseWheel(e){
+			console.log("mousewheel:" + e.wheelDelta);
 		}
-		mat.Vector4.rotate(r, [y, x, 0.0], vecMouseAngle);
+
+		/* マウスイベント(移動) */
+		function mouseMove(e){
+			if(event.which != 1/* left */) return;
+
+			let new_mMatrix = m.translate(plane.getModelMatrix(), [(e.movementX/100), -(e.movementY/100), 0], []);
+			plane.setModelMatrix(new_mMatrix);
+		}
+
+		/* マウス移動イベント */
+		function mouseMove_org(e){
+			let cw = canvas.width;
+			let ch = canvas.height;
+			let wh = 1 / Math.sqrt(cw * cw + ch * ch);
+			let x = e.clientX - canvas.offsetLeft - cw * 0.5;
+			let y = e.clientY - canvas.offsetTop - ch * 0.5;
+			let sq = Math.sqrt(x * x + y * y);
+			let r = sq * 2.0 * Math.PI * wh;
+			if(sq != 1){
+				sq = 1 / sq;
+				x *= sq;
+				y *= sq;
+			}
+			mat.Vector4.rotate(r, [y, x, 0.0], vecMouseAngle);
+		}
 	}
-}
 }
 
 /* プログラム生成(とシェーダリンク) */
